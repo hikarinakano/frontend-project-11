@@ -22,5 +22,4 @@ jobs:
         env:
           RSS_SECRET: ${{ secrets.RSS_SECRET }}
         with:
-          coverageCommand: make test-coverage
           debug: true
