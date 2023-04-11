@@ -1,0 +1,29 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "description": "RSS Agreggator is a programm",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hikarinakano/frontend-project-11.git"
+  },
+  "author": "Irina Shersheyeva",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hikarinakano/frontend-project-11/issues"
+  },
+  "type": "module",
+  "homepage": "https://github.com/hikarinakano/frontend-project-11#readme",
+  "dependencies": {
+    "jest": "^29.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.38.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jest": "^27.2.1"
+  }
+}
