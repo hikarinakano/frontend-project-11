@@ -21,5 +21,3 @@ jobs:
       # Add Code Climate secret key
         env:
           RSS_SECRET: ${{ secrets.RSS_SECRET }}
-        with:
-          debug: true
