@@ -1,4 +1,7 @@
 /node_modules/
+*.log
+dist
+assets
 coverage
 newKey
 newKey.pub
