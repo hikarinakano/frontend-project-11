@@ -2,7 +2,8 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './src/js/main.js',
+  mode: 'development',
+  entry: './src/main.js',
   output: {
     filename: 'main.js',
     path: path.resolve(__dirname, 'dist')
@@ -15,30 +16,37 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(scss)$/,
-        use: [
-          {
-            loader: 'style-loader'
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
           },
-          {
-            loader: 'css-loader'
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              postcssOptions: {
-                plugins: () => [
-                 require('autoprefixer')
-                ]
-              }
-            }
-          },
-          {
-            loader: 'sass-loader'
-          }
-        ]
-      }
-    ]
-  }
- }
+        },
+      },
+      { test: /\.css$/, use: ['style-loader', 'css-loader', 'postcss-loader'] },
+      {
+        test: /\.scss$/,
+        use: ['style-loader', 'css-loader', 'sass-loader', 'postcss-loader'],
+      },
+      {
+        test: /\.woff2?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        use: 'url-loader?limit=10000',
+      },
+      {
+        test: /\.(ttf|eot|svg)(\?[\s\S]+)?$/,
+        use: 'file-loader',
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: 'index.html',
+    }),
+  ],
+  output: {
+    clean: true,
+  },
+};
 
