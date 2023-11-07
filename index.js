@@ -1,3 +1,3 @@
-import './src/styles.scss';
+import './src/style.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
