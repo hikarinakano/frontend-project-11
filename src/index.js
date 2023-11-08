@@ -1,7 +1,6 @@
 import './styles.scss';
 import 'bootstrap';
 import 'yup';
-import { data } from './data.js';
 
 // const root = document.getElementById('app')
 
@@ -18,9 +17,9 @@ import { data } from './data.js';
 // const render = (container, watchedState) => {
 //   console.log(watchedState)
 // }
- 
+
 // export default () => {
-//   const state = {
+//  const state = {
 
 //   };
 

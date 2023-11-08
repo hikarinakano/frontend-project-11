@@ -1,17 +1,16 @@
-import onChange from "on-change";
+// import onChange from 'on-change';
 
+// const watchedState = onChange(state, (path, value) => {
+//   switch (path) {
+//     case 'lng': i18n.changeLanguage(value).then(() => render(container, watchedState, i18n));
+//       break;
 
-const watchedState = onChange(state, (path, value) => {
-  switch (path) {
-    case 'lng': i18nInstance.changeLanguage(value).then(() => render(container, watchedState, i18nInstance));
-      break;
+//     case 'clicksCount': render(container, watchedState, i18nInstance);
+//       break;
 
-    case 'clicksCount': render(container, watchedState, i18nInstance);
-      break;
+//     default:
+//       break;
+//   }
+// });
 
-    default:
-      break;
-  }
-});
-
-export default watchedState;
+// export default watchedState;
