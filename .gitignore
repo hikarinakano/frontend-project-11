@@ -6,3 +6,4 @@ coverage
 newKey
 newKey.pub
 .vercel
+vercel.json
