@@ -4,7 +4,7 @@
   "description": "RSS Agreggator is a programm",
   "main": "index.js",
   "scripts": {
-    "build": "",
+    "build": "webpack --mode production",
     "start": "webpack serve --mode production",
     "test": "jest"
   },
