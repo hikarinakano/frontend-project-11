@@ -54,14 +54,19 @@ const app = () => {
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     const link = elements.inputEl.value;
-    if (Object.keys(validate(link)).length === 0) {
-      state.feeds.push({feedValue: link, isValidated: true})
+    const existedFeed  = state.feeds.find((feed) => feed.feedValue === link && feed.isValidated);
+    console.log(existedFeed)
+    
+    if (Object.keys(validate(link)).length === 0 && existedFeed === undefined) {
+      state.feeds.push({feedValue: link, isValidated: true});
+    }else if(Object.keys(validate(link)).length === 0 && existedFeed !== undefined) {
+      state.feeds.push({error: 'RSS already exists'});
     }
     else {
       state.feeds.push({feedValue: link, isValidated: false, error:'The URL must be valid'});
     }
     Object.keys(state.feeds).forEach(feedId => {
-      console.log(state.feeds[feedId].error)
+      
       if (state.feeds[feedId].error) {
         elements.inputEl.classList.add('is-invalid');
         if (elements.message.classList.contains('text-sucess')) {
