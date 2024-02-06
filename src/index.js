@@ -1,29 +1,50 @@
 import './styles.scss';
 import 'bootstrap';
 import * as yup from 'yup';
-import keyBy from 'lodash';
-// import has from 'lodash/has.js';
-// import isEmpty from 'lodash/isEmpty.js';
-// import onChange from 'on-change';
+import watch from './view.js';
+import { keyBy } from 'lodash';
 
 // const rssAdressExample = "https://ru.hexlet.io/lessons.rss";
 // const rssAdressExample = 'http://example.com';
-const rssSchema = yup.string().url('URL must be valid').required();
+// how to store feeds and add up validated ones?
 
-// const errorMessages = {
-//   network: {
-//     error: 'Network problems.Try again.',
-//   }
-// };
-const validate = (schema) => {
+const rssSchema = yup.object().shape({
+  url: yup.string()
+    .url('URL must be valid')
+    .test('uniqie-url', 'This URL has already been added', function(value) {
+      const { feeds } = this.options.context;
+      return !feeds.includes(value);
+    })
+    .required(),
+});
+
+// function keyBy(array, key) {
+//   return array.reduce((result, item) => {
+//     const res = { ...result };
+//     res[item[key]] = item;
+//     return res;
+//   }, {});
+// }
+
+const validate = (fields, { context, abortEarly }) => {
   try {
-    rssSchema.validateSync(schema, { abortEarly: false });
-    return {};
+    rssSchema.validateSync(fields, {context, abortEarly});
+    return {}
   } catch (e) {
-    return keyBy(e.inner, 'path');
+    console.log(e.inner)
+    return _.keyBy(e.inner, 'path');
   }
 };
 
+// const validate = (fields, { context, abortEarly }) => {
+//   return new Promise((resolve, reject) => {
+//     rssSchema.validate(fields, { context, abortEarly })
+//     .then(valid => resolve())
+//     .catch(err => {
+//       reject(keyBy(err.inner, 'path'))
+//     })
+//   })
+// }
 // const render = (elements, initialState) => (path, value, prevValue) => {
 //   console.log('path',path)
 //   console.log('value', value)
@@ -39,9 +60,6 @@ const validate = (schema) => {
 // };
 
 const app = () => {
-  const state = {
-    feeds: [],
-  };
   const elements = {
     container: document.querySelector('.container-fluid'),
     form: document.querySelector('form'),
@@ -49,35 +67,35 @@ const app = () => {
     example: document.querySelector('.mt-2'),
     message: document.querySelector('.feedback'),
   };
+  const state = watch(elements, {
+    rssForm: {
+      fields: {
+        url: ''
+      },
+      errors: {},
+    },
+    feeds: [],
+  });
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     const link = elements.inputEl.value;
-    const existedFeed = state.feeds.find((feed) => feed.feedValue === link && feed.isValidated);
-
-    if (Object.keys(validate(link)).length === 0 && existedFeed === undefined) {
-      state.feeds.push({ feedValue: link, isValidated: true });
-    } else if (Object.keys(validate(link)).length === 0 && existedFeed !== undefined) {
-      state.feeds.push({ error: 'RSS already exists' });
-    } else {
-      state.feeds.push({ feedValue: link, isValidated: false, error: 'The URL must be valid' });
+    state.rssForm.fields.url = link;
+    state.rssForm.errors = 
+      validate(
+        state.rssForm.fields,
+        {context: {feeds: state.feeds }, abortEarly: false}
+      )
+      // .then(() => {
+      //   console.log('Validation succeeded')
+      // })
+      // .catch(errors => {
+      //   console.log('Validation failed with errors:', errors.url)
+      //   return errors.url;
+      // })
+    if (!state.rssForm.errors.hasOwnProperty('url')) {
+      state.feeds.push(state.rssForm.fields.url);
     }
-    Object.keys(state.feeds).forEach((feedId) => {
-      if (state.feeds[feedId].error) {
-        elements.inputEl.classList.add('is-invalid');
-        if (elements.message.classList.contains('text-sucess')) {
-          elements.message.classList.remove('text-sucess');
-        }
-        elements.message.classList.add('text-danger');
-        elements.message.textContent = state.feeds[feedId].error;
-      } else {
-        elements.message.classList.remove('text-danger');
-        elements.message.classList.add('text-sucess');
-        elements.message.textContent = 'Sucess!';
-        elements.inputEl.classList.remove('is-invalid');
-        elements.inputEl.value = '';
-        elements.inputEl.focus();
-      }
-    });
+
   });
 };
 
