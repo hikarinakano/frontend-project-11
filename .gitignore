@@ -7,3 +7,4 @@ newKey
 newKey.pub
 .vercel
 vercel.json
+/src/__fixtures__
