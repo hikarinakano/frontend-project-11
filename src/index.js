@@ -3,8 +3,11 @@ import 'bootstrap';
 import * as yup from 'yup';
 import _ from 'lodash';
 import i18next from 'i18next';
+import axios from 'axios';
 import watch from './view.js';
 import resources from './locales/index.js';
+import parse from './parser.js';
+import parseRssXml from './rssParser.js';
 
 yup.setLocale({
   mixed: {
@@ -43,6 +46,17 @@ const elements = {
   message: document.querySelector('.feedback'),
 };
 
+const getRequest = (url) => axios.get(
+  `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`,
+)
+  .then((response) => {
+    const data = response.data.contents;
+    return parse(data);
+  })
+  .catch((err) => {
+    console.error('Error occured', err.message);
+  });
+
 const app = async () => {
   const i18nInstance = i18next.createInstance();
   await i18nInstance.init({
@@ -58,6 +72,7 @@ const app = async () => {
       errors: {},
     },
     feeds: [],
+    rssFeeds: [],
   });
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -66,9 +81,18 @@ const app = async () => {
     state.rssForm.fields.url = link;
     validate(state)
       .then(() => {
-        state.rssForm.errors = {};
-        state.feeds.push(state.rssForm.fields.url);
-        state.rssForm.fields.url = '';
+        const currentValidatedUrl = state.rssForm.fields.url;
+        state.feeds = [...state.feeds, currentValidatedUrl];
+        getRequest(state.rssForm.fields.url)
+          .then((parsedData) => {
+            // console.log(parsedData);
+            state.rssFeeds = [...state.rssFeeds, parseRssXml(parsedData, currentValidatedUrl)];
+            state.rssForm.errors = {};
+            state.rssForm.fields.url = '';
+          })
+          .catch((parseError) => {
+            state.rssForm.errors = { parseError };
+          });
       })
       .catch((err) => {
         state.rssForm.errors = _.keyBy(err.inner, 'path');
