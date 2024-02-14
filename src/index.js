@@ -22,7 +22,6 @@ yup.setLocale({
 
 // const rssAdressExample = "https://ru.hexlet.io/lessons.rss";
 // const rssAdressExample = 'http://example.com';
-// add to state {feeds:[{feedId, url, posts: [{postId, text}]}]}
 const rssSchema = yup.object().shape({
   url: yup.string()
     .url('errors.validation.notUrl')
@@ -39,7 +38,6 @@ const validate = (state) => rssSchema.validate(
 );
 
 const elements = {
-  container: document.querySelector('.container-fluid'),
   form: document.querySelector('form'),
   inputEl: document.querySelector('input'),
   example: document.querySelector('.mt-2'),
@@ -57,6 +55,17 @@ const getRequest = (url) => axios.get(
     console.error('Error occured', err.message);
   });
 
+const loadRss = (url, state) => getRequest(url)
+  .then((parsedData) => {
+    const index = _.findIndex(state.rssFeeds, (feed) => feed.url === url);
+    const rssFeed = parseRssXml(parsedData, url);
+    if (index < 0) {
+      state.rssFeeds.unshift(rssFeed);
+    } else {
+      _.set(state.rssFeeds, `[${index}]`, rssFeed);
+    }
+  });
+
 const app = async () => {
   const i18nInstance = i18next.createInstance();
   await i18nInstance.init({
@@ -64,6 +73,7 @@ const app = async () => {
     debug: false,
     resources,
   });
+
   const state = watch(elements, i18nInstance, {
     rssForm: {
       fields: {
@@ -74,6 +84,20 @@ const app = async () => {
     feeds: [],
     rssFeeds: [],
   });
+
+  const fnc = () => {
+    state.feeds.map((url) => loadRss(url, state));
+  };
+
+  const refresh = () => {
+    setTimeout(() => {
+      fnc();
+      refresh();
+    }, 5000);
+  };
+
+  refresh();
+
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -81,12 +105,10 @@ const app = async () => {
     state.rssForm.fields.url = link;
     validate(state)
       .then(() => {
-        const currentValidatedUrl = state.rssForm.fields.url;
-        state.feeds = [...state.feeds, currentValidatedUrl];
-        getRequest(state.rssForm.fields.url)
-          .then((parsedData) => {
-            // console.log(parsedData);
-            state.rssFeeds = [...state.rssFeeds, parseRssXml(parsedData, currentValidatedUrl)];
+        const currentUrl = state.rssForm.fields.url;
+        state.feeds = [...state.feeds, currentUrl];
+        loadRss(currentUrl, state)
+          .then(() => {
             state.rssForm.errors = {};
             state.rssForm.fields.url = '';
           })
@@ -99,5 +121,5 @@ const app = async () => {
       });
   });
 };
-
+// add a check on all rss feeds if there are updates on feeds.
 app();
