@@ -1,20 +1,20 @@
 // example feeds : https://lorem-rss.hexlet.app/feed?length=42
 // another is  https://ru.hexlet.io/lessons.rss
-// i also need to find modal and fill in the description
-const modalLogic = (button, { title, desc, link }) => {
-  const modalHeader = document.querySelector('.modal-header');
-  const modalContent = document.querySelector('.modal-body');
-  const modal = document.querySelector('.modal-content');
-  const openLinkBtn = modal.querySelector('.full-article');
-  button.addEventListener('click', () => {
-    modalHeader.textContent = title;
-    modalContent.textContent = desc;
-    openLinkBtn.addEventListener('click', () => {
-      openLinkBtn.href = link;
-    });
-  });
-  // create in a state new instance for modal logic
+
+const modalEl = {
+  header: document.querySelector('.modal-header'),
+  body: document.querySelector('.modal-body'),
+  openLinkButton: document.querySelector('.full-article'),
 };
+
+const modalLogic = (button, { title, desc, link }) => {
+  button.addEventListener('click', () => {
+    modalEl.header.textContent = title;
+    modalEl.body.textContent = desc;
+    modalEl.openLinkButton.href = link;
+  });
+};
+
 const createPosts = (postsList, postsHeader, viewButton, ul) => {
   const postsDiv = document.querySelector('.posts');
   postsDiv.innerHTML = '';
@@ -29,11 +29,11 @@ const createPosts = (postsList, postsHeader, viewButton, ul) => {
   header.classList.add('card-title', 'h4');
   header.innerText = postsHeader;
 
-  bodyDiv.insertAdjacentElement('afterbegin', header);
+  bodyDiv.insertAdjacentElement('beforeend', header);
   // ul is one main for all, as for header and till newDiv
   // const ul = document.createElement('ul');
   // ul.classList.add('list-group', 'border-0', 'rounded-0');
-
+  // maybe i need to have status in state?
   postsList.forEach(({
     id, title, link, desc,
   }) => {
@@ -69,7 +69,9 @@ const createPosts = (postsList, postsHeader, viewButton, ul) => {
     button.setAttribute('data-bs-target', '#modal');
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
     button.textContent = viewButton;
+
     modalLogic(button, { title, desc, link });
+
     li.insertAdjacentElement('beforeend', button);
 
     ul.insertAdjacentElement('beforeend', li);
@@ -80,7 +82,7 @@ const createPosts = (postsList, postsHeader, viewButton, ul) => {
   postsDiv.insertAdjacentElement('beforeend', newDiv);
 };
 
-const createFeeds = (feedsList, [postsHeader, feedsHeader, viewButton]) => {
+export default function renderFeedsAndPosts(feedsList, [postsHeader, feedsHeader, viewButton]) {
   const feedsDiv = document.querySelector('.feeds');
   feedsDiv.innerHTML = '';
 
@@ -102,7 +104,6 @@ const createFeeds = (feedsList, [postsHeader, feedsHeader, viewButton]) => {
   ul.classList.add('list-group', 'border-0', 'rounded-0');
   const postsUl = document.createElement('ul');
   postsUl.classList.add('list-group', 'border-0', 'rounded-0');
-
   feedsList.forEach(({ feedTitle, feedDesc, posts }) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'border-0', 'border-end-0');
@@ -117,24 +118,11 @@ const createFeeds = (feedsList, [postsHeader, feedsHeader, viewButton]) => {
 
     li.insertAdjacentElement('beforeend', title);
     li.insertAdjacentElement('beforeend', desc);
-    ul.insertAdjacentElement('afterbegin', li);
+
+    ul.append(li);
 
     createPosts(posts, postsHeader, viewButton, postsUl);
   });
   newDiv.insertAdjacentElement('beforeend', ul);
   feedsDiv.insertAdjacentElement('beforeend', newDiv);
-};
-
-export default function renderFeedsAndPosts(rssDataList, [postsHeader, feedsHeader, viewButton]) {
-  createFeeds(rssDataList, [postsHeader, feedsHeader, viewButton]);
-  // rssDataList.map(({id, feedTitle, feedDesc, posts},) => {
-  //   // create two outer divs
-  //   // create outer h2
-  //   // create outer ul
-  //   // then stuff ul with li
-  //   // then another two outer divs
-  //   //then h2
-  //   // then ul
-  //   // then stuff it with map
-  // })
 }
