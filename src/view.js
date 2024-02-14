@@ -8,7 +8,7 @@ export default (elements, i18n, state) => {
   const [postsTr, feedsTr, viewButton] = [i18n.t('posts'), i18n.t('feeds'), i18n.t('viewButton')];
   return onChange(state, () => {
     const {
-      rssForm: { errors },
+      rssForm: { errors, fields },
       rssFeeds,
     } = state;
     // console.log(Object.entries(errors).length)
@@ -25,16 +25,15 @@ export default (elements, i18n, state) => {
       message.textContent = i18n.t('errors.noRssFound');
     }
 
-    if (state.rssFeeds.length !== 0) {
+    if (rssFeeds.length !== 0) {
       inputEl.focus();
       // render of feeds and posts on success
       render(rssFeeds, [postsTr, feedsTr, viewButton]);
-      // message.classList.add('text-success');
-      // message.classList.remove('text-danger');
-      // inputEl.classList.remove('is-invalid');
-      // message.textContent = i18n.t('success');
-      // inputEl.value = fields.url;
-      // // inputEl.value = '';
+      message.classList.add('text-success');
+      message.classList.remove('text-danger');
+      inputEl.classList.remove('is-invalid');
+      message.textContent = i18n.t('success');
+      inputEl.value = fields.url;
     }
   });
 };
