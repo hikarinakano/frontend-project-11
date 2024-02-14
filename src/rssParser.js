@@ -1,7 +1,6 @@
 import { uniqueId } from 'lodash';
 
 const parsePostsXml = (posts) => [...posts].map((item, index) => {
-  // console.log(posts);
   const id = index + 1;
   const title = item.querySelector('title').textContent;
   const desc = item.querySelector('description').textContent;
@@ -23,7 +22,7 @@ const parseRssXml = (xml, url) => {
     id: uniqueId(),
     feedTitle,
     feedDesc,
-    validatedUrl: url,
+    url,
     posts: parsePostsXml(posts),
   };
 };
