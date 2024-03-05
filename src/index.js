@@ -155,8 +155,6 @@ const app = async () => {
   const refresh = () => {
     setTimeout(() => {
       fnc();
-      // const links = document.querySelectorAll('.list-group-item');
-      // updateStateLinks(links);
       refresh();
     }, 5000);
   };
