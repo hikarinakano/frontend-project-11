@@ -1,15 +1,11 @@
-import { uniqueId } from 'lodash';
-
-const parsePostsXml = (posts) => [...posts].map((item, index) => {
-  const id = index + 1;
+const parsePostsXml = (posts) => [...posts].map((item) => {
   const title = item.querySelector('title').textContent;
   const desc = item.querySelector('description').textContent;
   const link = item.querySelector('link').textContent;
   return {
-    id,
     title,
     desc,
-    link,
+    id: link,
   };
 });
 
@@ -18,13 +14,14 @@ const parseRssXml = (xml, url) => {
   const posts = feed.querySelectorAll('item');
   const feedTitle = feed.querySelector('title').textContent;
   const feedDesc = feed.querySelector('description').textContent;
-  return {
-    id: uniqueId(),
+
+  const rssFeed = {
+    id: url,
     feedTitle,
     feedDesc,
-    url,
     posts: parsePostsXml(posts),
   };
+  return rssFeed;
 };
 
 export default parseRssXml;
