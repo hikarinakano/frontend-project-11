@@ -7,11 +7,11 @@ const modalEl = {
   openLinkButton: document.querySelector('.full-article'),
 };
 
-const modalLogic = (button, { title, desc, link }) => {
+const modalLogic = (button, { title, desc, id }) => {
   button.addEventListener('click', () => {
     modalEl.header.textContent = title;
     modalEl.body.textContent = desc;
-    modalEl.openLinkButton.href = link;
+    modalEl.openLinkButton.href = id;
   });
 };
 
@@ -35,7 +35,7 @@ const createPosts = (postsList, postsHeader, viewButton, ul) => {
   // ul.classList.add('list-group', 'border-0', 'rounded-0');
   // maybe i need to have status in state?
   postsList.forEach(({
-    id, title, link, desc,
+    id, title, desc,
   }) => {
     // post = {id, title, desc, link}
     // desc goes to modal, as well as title
@@ -54,7 +54,7 @@ const createPosts = (postsList, postsHeader, viewButton, ul) => {
     // modalContent.textContent = desc;
     const a = document.createElement('a');
     a.classList.add('fw-bold');
-    a.setAttribute('href', link);
+    a.setAttribute('href', id);
     a.setAttribute('data-id', id);
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener noreferrer');
@@ -70,7 +70,7 @@ const createPosts = (postsList, postsHeader, viewButton, ul) => {
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
     button.textContent = viewButton;
 
-    modalLogic(button, { title, desc, link });
+    modalLogic(button, { title, desc, id });
 
     li.insertAdjacentElement('beforeend', button);
 
