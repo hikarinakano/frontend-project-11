@@ -14,7 +14,6 @@ const modalLogic = (button, { title, desc, id }) => {
     modalEl.openLinkButton.href = id;
   });
 };
-
 const createPosts = (postsList, postsHeader, viewButton, ul) => {
   const postsDiv = document.querySelector('.posts');
   postsDiv.innerHTML = '';
