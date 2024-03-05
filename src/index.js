@@ -55,16 +55,39 @@ const getRequest = (url) => axios.get(
     console.error('Error occured', err.message);
   });
 
-const loadRss = (url, state) => getRequest(url)
-  .then((parsedData) => {
-    const index = _.findIndex(state.rssFeeds, (feed) => feed.url === url);
-    const rssFeed = parseRssXml(parsedData, url);
-    if (index < 0) {
-      state.rssFeeds.unshift(rssFeed);
-    } else {
-      _.set(state.rssFeeds, `[${index}]`, rssFeed);
+function checkAndAddNewPosts(newPosts, existingPosts) {
+  const existingLinks = new Set(existingPosts.map((post) => post.id));
+  newPosts.forEach((post) => {
+    if (!existingLinks.has(post.id)) {
+      existingPosts.unshift(post);
     }
   });
+  return existingPosts;
+}
+
+// const loadRss = (url, rssFeeds) => getRequest(url)
+//   .then((parsedData) => {
+//     const index = _.findIndex(rssFeeds, (feed) => feed.id === url);
+//     const rssFeed = parseRssXml(parsedData, url);
+//     if (index < 0) {
+//       state.rssFeeds = [rssFeed, ...rssFeeds];
+//     } else {
+//       // const existingFeed = state.rssFeeds[index];
+//       // state.rssFeeds[index].posts = checkAndAddNewPosts(rssFeed.posts, existingFeed.posts);
+//       state.rssFeeds = rssFeeds.map((feed, i) => {
+//         if (i === index) {
+//           return {
+//             ...feed,
+//             posts: checkAndAddNewPosts(rssFeed.posts, feed.posts),
+//           };
+//         }
+//         return feed;
+//       });
+//     }
+//   })
+//   .catch((e) => {
+//     state.rssForm.errors = { parseError: e };
+//   });
 
 const app = async () => {
   const i18nInstance = i18next.createInstance();
@@ -83,15 +106,57 @@ const app = async () => {
     },
     feeds: [],
     rssFeeds: [],
+    openedLinks: [],
   });
 
+  const updateStateLinks = (links) => {
+    links.forEach((link) => {
+      const { children } = link;
+      Array.from(children).forEach((child) => {
+        child.addEventListener('click', (e) => {
+          if (e.target.getAttribute('href') && !state.openedLinks.includes(child.href)) {
+            state.openedLinks.push(child.href);
+          } else if (e.target.dataset.id && !state.openedLinks.includes(e.target.dataset.id)) {
+            state.openedLinks.push(e.target.dataset.id);
+          }
+        });
+      });
+    });
+  };
+  const loadRss = (url, rssFeeds) => getRequest(url)
+    .then((parsedData) => {
+      const index = _.findIndex(rssFeeds, (feed) => feed.id === url);
+      const rssFeed = parseRssXml(parsedData, url);
+      if (index < 0) {
+        state.rssFeeds = [rssFeed, ...rssFeeds];
+      } else {
+        // const existingFeed = state.rssFeeds[index];
+        // state.rssFeeds[index].posts = checkAndAddNewPosts(rssFeed.posts, existingFeed.posts);
+        state.rssFeeds = rssFeeds.map((feed, i) => {
+          if (i === index) {
+            return {
+              ...feed,
+              posts: checkAndAddNewPosts(rssFeed.posts, feed.posts),
+            };
+          }
+          return feed;
+        });
+      }
+    })
+    .catch((e) => {
+      state.rssForm.errors = { parseError: e };
+    });
   const fnc = () => {
     state.feeds.map((url) => loadRss(url, state));
+    const links = document.querySelectorAll('.list-group-item');
+    updateStateLinks(links);
   };
 
   const refresh = () => {
     setTimeout(() => {
       fnc();
+      // const links = document.querySelectorAll('.list-group-item');
+      // updateStateLinks(links);
       refresh();
     }, 5000);
   };
@@ -100,16 +165,16 @@ const app = async () => {
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-
     const link = elements.inputEl.value;
+
     state.rssForm.fields.url = link;
     validate(state)
       .then(() => {
         const currentUrl = state.rssForm.fields.url;
-        state.feeds = [...state.feeds, currentUrl];
-        loadRss(currentUrl, state)
+        loadRss(currentUrl, state.rssFeeds)
           .then(() => {
             state.rssForm.errors = {};
+            state.feeds = [...state.feeds, currentUrl];
             state.rssForm.fields.url = '';
           })
           .catch((parseError) => {
