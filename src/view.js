@@ -2,6 +2,19 @@ import onChange from 'on-change';
 import _ from 'lodash';
 import render from './render.js';
 // import { uniqueId } from 'lodash';
+// http://example.com
+
+const changeVisitedLinks = (openedLinks) => {
+  const headers = document.querySelectorAll('.fw-bold');
+  Array.from(headers).forEach((header) => {
+    const nodeHref = header.getAttribute('href');
+    if (openedLinks.includes(nodeHref)) {
+      header.classList.remove('fw-bold');
+      header.classList.add('fw-normal');
+      header.classList.add('link-secondary');
+    }
+  });
+};
 
 export default (elements, i18n, state) => {
   const { inputEl, message } = elements;
@@ -10,30 +23,31 @@ export default (elements, i18n, state) => {
     const {
       rssForm: { errors, fields },
       rssFeeds,
+      openedLinks,
     } = state;
-    // console.log(Object.entries(errors).length)
-    if (_.has(errors, 'url')) {
+    if (_.has(errors, ['url'])) {
       message.classList.remove('text-success');
       message.classList.add('text-danger');
       inputEl.classList.add('is-invalid');
       message.textContent = i18n.t(errors.url.message);
     }
-    if (_.has(errors, 'parseError')) {
+    if (_.has(errors, ['parseError'])) {
       message.classList.remove('text-success');
       message.classList.add('text-danger');
       inputEl.classList.add('is-invalid');
       message.textContent = i18n.t('errors.noRssFound');
     }
-
-    if (rssFeeds.length !== 0) {
+    if (_.isEmpty(errors)) {
       inputEl.focus();
       // render of feeds and posts on success
       render(rssFeeds, [postsTr, feedsTr, viewButton]);
+
       message.classList.add('text-success');
       message.classList.remove('text-danger');
       inputEl.classList.remove('is-invalid');
       message.textContent = i18n.t('success');
-      inputEl.value = fields.url;
     }
+    inputEl.value = fields.url;
+    changeVisitedLinks(openedLinks);
   });
 };
