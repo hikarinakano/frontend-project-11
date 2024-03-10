@@ -10,7 +10,6 @@ const parsePostsXml = (posts) => [...posts].map((item) => {
 });
 
 const parseRssXml = (xml, url) => {
-  console.log('current xml', xml);
   const feed = xml.querySelector('channel');
   const posts = feed.querySelectorAll('item');
   const feedTitle = feed.querySelector('title').textContent;
