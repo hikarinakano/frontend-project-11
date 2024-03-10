@@ -10,6 +10,7 @@ const parsePostsXml = (posts) => [...posts].map((item) => {
 });
 
 const parseRssXml = (xml, url) => {
+  console.log('current xml', xml);
   const feed = xml.querySelector('channel');
   const posts = feed.querySelectorAll('item');
   const feedTitle = feed.querySelector('title').textContent;
@@ -24,4 +25,10 @@ const parseRssXml = (xml, url) => {
   return rssFeed;
 };
 
-export default parseRssXml;
+const parse = (data, url) => {
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(data, 'text/xml');
+  return parseRssXml(xml, url);
+};
+
+export default parse;
