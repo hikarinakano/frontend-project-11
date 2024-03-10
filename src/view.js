@@ -2,17 +2,16 @@ import onChange from 'on-change';
 import _ from 'lodash';
 import render from './render.js';
 
-const changeVisitedLinks = (openedLinks) => {
-  const headers = document.querySelectorAll('.fw-bold');
-  Array.from(headers).forEach((header) => {
-    const nodeHref = header.getAttribute('href');
-    if (openedLinks.includes(nodeHref)) {
-      header.classList.remove('fw-bold');
-      header.classList.add('fw-normal');
-      header.classList.add('link-secondary');
-    }
-  });
-};
+// const changeVisitedLinks = (openedLinks) => {
+//   const links = document.querySelectorAll('a[data-id].fw-bold');
+//   Array.from(links).forEach((link) => {
+//     const url = link.getAttribute('href');
+//     if (openedLinks.has(url)) {
+//       link.classList.remove('fw-bold');
+//       link.classList.add('fw-normal', 'link-secondary');
+//     }
+//   });
+// };
 
 export default (elements, i18n, state) => {
   const { inputEl, message } = elements;
@@ -20,8 +19,6 @@ export default (elements, i18n, state) => {
   return onChange(state, () => {
     const {
       rssForm: { errors, fields },
-      rssFeeds,
-      openedLinks,
     } = state;
     if (_.has(errors, ['url'])) {
       message.classList.remove('text-success');
@@ -42,10 +39,9 @@ export default (elements, i18n, state) => {
       message.textContent = i18n.t('errors.noRssFound');
     }
     if (_.isEmpty(errors)) {
-      console.log('Now there are no errors in state');
       inputEl.focus();
       // render of feeds and posts on success
-      render(rssFeeds, [postsTr, feedsTr, viewButton]);
+      render(state, [postsTr, feedsTr, viewButton]);
 
       message.classList.add('text-success');
       message.classList.remove('text-danger');
@@ -53,6 +49,6 @@ export default (elements, i18n, state) => {
       message.textContent = i18n.t('success');
     }
     inputEl.value = fields.url;
-    changeVisitedLinks(openedLinks);
+    // changeVisitedLinks(openedLinks);
   });
 };

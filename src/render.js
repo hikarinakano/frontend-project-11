@@ -14,7 +14,20 @@ const modalLogic = (button, { title, desc, id }) => {
     modalEl.openLinkButton.href = id;
   });
 };
-const createPosts = (postsList, postsHeader, viewButton, ul) => {
+
+const changeVisitedLinks = (openedLinks) => {
+  const links = document.querySelectorAll('a[data-id].fw-bold');
+  Array.from(links).forEach((link) => {
+    const url = link.getAttribute('href');
+    if (openedLinks.has(url)) {
+      // console.log('the if with openedLinks.has(url) worked out!')
+      link.classList.remove('fw-bold');
+      link.classList.add('fw-normal', 'link-secondary');
+    }
+  });
+};
+
+const createPosts = (state, postsList, postsHeader, viewButton, ul) => {
   const postsDiv = document.querySelector('.posts');
   postsDiv.innerHTML = '';
 
@@ -58,6 +71,10 @@ const createPosts = (postsList, postsHeader, viewButton, ul) => {
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener noreferrer');
     a.textContent = title;
+    a.addEventListener('click', () => {
+      state.openedLinks.add(id);
+      changeVisitedLinks(state.openedLinks);
+    });
 
     li.insertAdjacentElement('beforeend', a);
 
@@ -68,6 +85,10 @@ const createPosts = (postsList, postsHeader, viewButton, ul) => {
     button.setAttribute('data-bs-target', '#modal');
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
     button.textContent = viewButton;
+    button.addEventListener('click', () => {
+      state.openedLinks.add(id);
+      changeVisitedLinks(state.openedLinks);
+    });
 
     modalLogic(button, { title, desc, id });
 
@@ -81,7 +102,8 @@ const createPosts = (postsList, postsHeader, viewButton, ul) => {
   postsDiv.insertAdjacentElement('beforeend', newDiv);
 };
 
-export default function renderFeedsAndPosts(feedsList, [postsHeader, feedsHeader, viewButton]) {
+export default function render(state, [postsHeader, feedsHeader, viewButton]) {
+  const { rssFeeds } = state;
   const feedsDiv = document.querySelector('.feeds');
   feedsDiv.innerHTML = '';
 
@@ -103,7 +125,7 @@ export default function renderFeedsAndPosts(feedsList, [postsHeader, feedsHeader
   ul.classList.add('list-group', 'border-0', 'rounded-0');
   const postsUl = document.createElement('ul');
   postsUl.classList.add('list-group', 'border-0', 'rounded-0');
-  feedsList.forEach(({ feedTitle, feedDesc, posts }) => {
+  rssFeeds.forEach(({ feedTitle, feedDesc, posts }) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'border-0', 'border-end-0');
 
@@ -120,7 +142,7 @@ export default function renderFeedsAndPosts(feedsList, [postsHeader, feedsHeader
 
     ul.append(li);
 
-    createPosts(posts, postsHeader, viewButton, postsUl);
+    createPosts(state, posts, postsHeader, viewButton, postsUl);
   });
   newDiv.insertAdjacentElement('beforeend', ul);
   feedsDiv.insertAdjacentElement('beforeend', newDiv);
