@@ -105,24 +105,8 @@ const app = async () => {
     },
     feeds: [],
     rssFeeds: [],
-    openedLinks: [],
+    openedLinks: new Set(),
   });
-
-  const updateStateLinks = (links) => {
-    console.log('UpdateStateLinks call', new Error().stack);
-    links.forEach((link) => {
-      const { children } = link;
-      Array.from(children).forEach((child) => {
-        child.addEventListener('click', (e) => {
-          if (e.target.getAttribute('href') && !state.openedLinks.includes(child.href)) {
-            state.openedLinks.push(child.href);
-          } else if (e.target.dataset.id && !state.openedLinks.includes(e.target.dataset.id)) {
-            state.openedLinks.push(e.target.dataset.id);
-          }
-        });
-      });
-    });
-  };
 
   const loadRss = (url) => {
     console.log('getRequest call', new Error().stack);
@@ -158,8 +142,6 @@ const app = async () => {
   const fnc = () => {
     console.log('fnc call', new Error().stack);
     state.feeds.map((url) => loadRss(url));
-    const links = document.querySelectorAll('.list-group-item');
-    updateStateLinks(links);
   };
 
   const refresh = () => {
