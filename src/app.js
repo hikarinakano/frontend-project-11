@@ -45,7 +45,7 @@ const app = async () => {
   }).then(() => {
     yupLocale();
   }).catch((err) => {
-    console.error('Error initializing i18next:', err);
+    console.log('Error initializing i18next:', err);
   });
 
   const state = watch(elements, i18nInstance, {
@@ -73,44 +73,20 @@ const app = async () => {
     );
   };
 
-  const getProxyUrl = (url) => {
-    const encodedUrl = encodeURIComponent(url);
-    const getRequest = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
-    const proxyUrl = new URL(getRequest + encodedUrl);
+  const addProxy = (originUrl) => {
+    const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
+    proxyUrl.searchParams.set('url', originUrl);
+    proxyUrl.searchParams.set('disableCache', 'true');
     return proxyUrl.toString();
   };
 
-  // const getProxyUrl = (url) => {
-  //   const encodedUrl = encodeURIComponent(url);
-  //   const getRequest = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
-  //   const proxyUrl = new URL(getRequest + encodedUrl);
-  //   return proxyUrl.toString();
-  // const proxyUrl = new URL('https://allorigins.hexlet.app/get');
-
-  // // Use URLSearchParams to manage query parameters
-  // const params = new URLSearchParams({
-  //     disableCache: 'true',
-  //     url: encodeURIComponent(url)
-  // });
-
-  // // Append the query parameters to the URL
-  // proxyUrl.search = params.toString();
-  // return proxyUrl.toString();
-  // somehow this version returns null contents when i try to parse response.data.contents
-  // };
-
   const loadRss = (url) => {
     console.log('getRequest call', new Error().stack);
-    const proxiedUrl = getProxyUrl(url);
-    // not working
-    // const proxiedUrl = `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`
-    // console.log(proxiedUrl)
+    const proxiedUrl = addProxy(url);
     return axios.get(proxiedUrl, { responseType: 'json' })
       .then((response) => {
         console.log('No Error', new Error().stack);
-        console.log('axios get response', response);
         const data = response.data.contents;
-        console.log('response data after get request', data);
         return parse(data, url);
       })
       .then((rssFeed) => {
@@ -122,6 +98,10 @@ const app = async () => {
           const existingFeed = state.rssFeeds[index];
           state.rssFeeds[index].posts = checkAndAddNewPosts(rssFeed.posts, existingFeed.posts);
         }
+      })
+      .catch((e) => {
+        console.error('Error:', e.code);
+        state.rssForm.status = 'internet disconnected';
       });
   };
 
@@ -158,7 +138,7 @@ const app = async () => {
             state.rssForm.fields.url = '';
           })
           .catch((error) => {
-            console.log(error);
+            console.log(error.code);
             state.rssForm.status = 'not loading';
             if (error.code === 'ERR_NETWORK') {
               state.rssForm.errors = { networkError: error.message };
