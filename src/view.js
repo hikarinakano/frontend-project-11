@@ -9,8 +9,6 @@ export default (elements, i18n, state) => {
     const {
       rssForm: { errors, fields },
     } = state;
-    console.error('errors', state.rssForm.errors);
-    console.log('status', state.rssForm.status);
     submitBtn.disabled = false;
     if (_.has(errors, ['url'])) {
       message.classList.remove('text-success');
