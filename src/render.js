@@ -15,10 +15,10 @@ const modalLogic = (button, { title, desc, id }) => {
   });
 };
 
-const changeVisitedLinks = ({ openedLinks, id }) => {
+const changeVisitedLinks = ({ id }) => {
   const links = document.querySelectorAll('a[data-id].fw-bold');
   Array.from(links).forEach((link) => {
-    if (openedLinks.has(id)) {
+    if (link.href === id) {
       link.classList.remove('fw-bold');
       link.classList.add('fw-normal', 'link-secondary');
     }
@@ -26,6 +26,7 @@ const changeVisitedLinks = ({ openedLinks, id }) => {
 };
 
 const createPosts = (state, postsList, postsHeader, viewButton, ul) => {
+  const { ui } = state;
   const postsDiv = document.querySelector('.posts');
   postsDiv.innerHTML = '';
 
@@ -62,9 +63,9 @@ const createPosts = (state, postsList, postsHeader, viewButton, ul) => {
     a.setAttribute('rel', 'noopener noreferrer');
     a.textContent = title;
     a.addEventListener('click', () => {
-      state.ui.openedLinks.add(id);
-      state.ui.id = id;
-      changeVisitedLinks(state.ui);
+      ui.openedLinks.add(id);
+      ui.id = id;
+      changeVisitedLinks(ui);
     });
 
     li.insertAdjacentElement('beforeend', a);
@@ -77,9 +78,9 @@ const createPosts = (state, postsList, postsHeader, viewButton, ul) => {
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
     button.textContent = viewButton;
     button.addEventListener('click', () => {
-      state.ui.openedLinks.add(id);
-      state.ui.id = id;
-      changeVisitedLinks(state.ui);
+      ui.openedLinks.add(id);
+      ui.id = id;
+      changeVisitedLinks(ui);
     });
 
     modalLogic(button, { title, desc, id });
