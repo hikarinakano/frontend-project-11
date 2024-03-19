@@ -28,8 +28,10 @@ export default (elements, i18n, state) => {
         inputEl.classList.add('is-invalid');
         message.textContent = i18n.t('errors.networkError');
       }
+      if (state.rssForm.status === 'no internet') {
+        return;
+      }
     }
-
     if (_.has(errors, ['parseError'])) {
       if (state.rssForm.status === 'loading Rss') {
         inputEl.classList.remove('is-invalid');
