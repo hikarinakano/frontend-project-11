@@ -83,7 +83,8 @@ const app = async () => {
   const loadRss = (url) => {
     console.log('getRequest call', new Error().stack);
     const proxiedUrl = addProxy(url);
-    return axios.get(proxiedUrl, { responseType: 'json' })
+    const getRequest = axios.get(proxiedUrl, { responseType: 'json' }).catch((e) => console.log(e));
+    return getRequest
       .then((response) => {
         console.log('No Error', new Error().stack);
         const data = response.data.contents;
@@ -98,10 +99,6 @@ const app = async () => {
           const existingFeed = state.rssFeeds[index];
           state.rssFeeds[index].posts = checkAndAddNewPosts(rssFeed.posts, existingFeed.posts);
         }
-      })
-      .catch((e) => {
-        console.error('Error:', e.code);
-        state.rssForm.status = 'internet disconnected';
       });
   };
 
@@ -138,8 +135,9 @@ const app = async () => {
             state.rssForm.fields.url = '';
           })
           .catch((error) => {
-            console.log(error.code);
+            // console.log(error.code);
             state.rssForm.status = 'not loading';
+            console.log(error.message);
             if (error.code === 'ERR_NETWORK') {
               state.rssForm.errors = { networkError: error.message };
             } else {
