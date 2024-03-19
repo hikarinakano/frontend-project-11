@@ -83,14 +83,12 @@ const app = async () => {
   const loadRss = (url) => {
     console.log('getRequest call', new Error().stack);
     const proxiedUrl = addProxy(url);
-    const getRequest = axios.get(proxiedUrl, { responseType: 'json' }).catch((e) => console.log(e));
+    const getRequest = axios.get(proxiedUrl, { responseType: 'json' });
     return getRequest
       .then((response) => {
         console.log('No Error', new Error().stack);
         const data = response.data.contents;
-        return parse(data, url);
-      })
-      .then((rssFeed) => {
+        const rssFeed = parse(data, url);
         console.log('No Error', new Error().stack);
         const index = _.findIndex(state.rssFeeds, (feed) => feed.id === url);
         if (index < 0) {
@@ -99,12 +97,23 @@ const app = async () => {
           const existingFeed = state.rssFeeds[index];
           state.rssFeeds[index].posts = checkAndAddNewPosts(rssFeed.posts, existingFeed.posts);
         }
+        return true;
       });
+  };
+
+  const updateError = (error) => {
+    state.rssForm.status = 'not loading';
+    if (error.code === 'ERR_NETWORK') {
+      state.rssForm.errors = { networkError: error.message };
+    } else {
+      state.rssForm.errors = { parseError: error };
+    }
+    return false;
   };
 
   const fnc = () => {
     console.log('fnc call', new Error().stack);
-    state.feeds.map((url) => loadRss(url));
+    state.feeds.map((url) => loadRss(url).catch(updateError));
   };
 
   const refresh = () => {
@@ -121,29 +130,21 @@ const app = async () => {
     console.log('not Error', new Error().stack);
     e.preventDefault();
     const link = elements.inputEl.value;
-
     state.rssForm.fields.url = link;
     validate(state)
       .then(() => {
         const currentUrl = state.rssForm.fields.url;
         state.rssForm.status = 'loading Rss';
         loadRss(currentUrl)
-          .then(() => {
+          .catch(updateError)
+          .then((success) => {
+            if (!success) {
+              return;
+            }
             state.rssForm.errors = {};
             state.rssForm.status = 'success';
             state.feeds = [...state.feeds, currentUrl];
             state.rssForm.fields.url = '';
-          })
-          .catch((error) => {
-            // console.log(error.code);
-            state.rssForm.status = 'not loading';
-            console.log(error.message);
-            if (error.code === 'ERR_NETWORK') {
-              state.rssForm.errors = { networkError: error.message };
-            } else {
-              state.rssForm.errors = { parseError: error };
-            }
-            console.log('No Error', new Error().stack);
           });
       })
       .catch((err) => {
