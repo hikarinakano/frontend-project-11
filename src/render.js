@@ -7,12 +7,11 @@ const modalEl = {
   openLinkButton: document.querySelector('.full-article'),
 };
 
-const modalLogic = (button, { title, desc, id }) => {
-  button.addEventListener('click', () => {
-    modalEl.header.textContent = title;
-    modalEl.body.textContent = desc;
-    modalEl.openLinkButton.href = id;
-  });
+const renderModal = (posts, uiId) => {
+  const { title, desc, id } = posts.find((post) => post.id === uiId);
+  modalEl.header.textContent = title;
+  modalEl.body.textContent = desc;
+  modalEl.openLinkButton.href = id;
 };
 
 const changeVisitedLinks = ({ id }) => {
@@ -25,7 +24,7 @@ const changeVisitedLinks = ({ id }) => {
   });
 };
 
-const createPosts = (state, postsList, postsHeader, viewButton, ul) => {
+const createPosts = (state, posts, postsHeader, viewButton, ul) => {
   const { ui } = state;
   const postsDiv = document.querySelector('.posts');
   postsDiv.innerHTML = '';
@@ -42,8 +41,8 @@ const createPosts = (state, postsList, postsHeader, viewButton, ul) => {
 
   bodyDiv.insertAdjacentElement('beforeend', header);
 
-  postsList.forEach(({
-    id, title, desc,
+  posts.forEach(({
+    id, title,
   }) => {
     const li = document.createElement('li');
     li.classList.add(
@@ -77,13 +76,13 @@ const createPosts = (state, postsList, postsHeader, viewButton, ul) => {
     button.setAttribute('data-bs-target', '#modal');
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
     button.textContent = viewButton;
+
     button.addEventListener('click', () => {
       ui.openedLinks.add(id);
       ui.id = id;
       changeVisitedLinks(ui);
+      renderModal(posts, ui.id);
     });
-
-    modalLogic(button, { title, desc, id });
 
     li.insertAdjacentElement('beforeend', button);
 
