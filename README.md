@@ -4,6 +4,9 @@
 
 [![Vercel](https://vercelbadge.vercel.app/api/hikarinakano/frontend-project-11)](https://frontend-project-11-pied-three.vercel.app/)
 
+<a href="https://frontend-project-11-pied-three.vercel.app/">Vercel development page</a>
+
+
 <h2>RSS Agregator is a web app that generates RSS Feeds with link provided to it and updates existing Feeds every 5 seconds</h2>
 <h2>Requirements:</h2>
 <ul>
@@ -20,4 +23,4 @@ $ cd frontend-project-11.git
 $ npm ci
 $ npm start 
 ```  
-# [the default port is 8081](http://localhost:8081/)
+# the default port is 8081
