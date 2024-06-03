@@ -25,7 +25,7 @@ const checkAndAddNewPosts = (newPosts, posts) => {
     }
   });
   return posts;
-}
+};
 
 const app = async () => {
   const elements = {
@@ -34,7 +34,7 @@ const app = async () => {
     example: document.querySelector('.mt-2'),
     message: document.querySelector('.feedback'),
     submitBtn: document.querySelector('button[type="submit"]'),
-  };  
+  };
   console.log('app call', new Error().stack);
   const i18nInstance = i18next.createInstance();
   i18nInstance.init({
