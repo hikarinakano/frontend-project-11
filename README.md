@@ -10,9 +10,9 @@
 <h2>RSS Agregator is a web app that generates RSS Feeds with link provided to it and updates existing Feeds every 5 seconds</h2>
 <h2>Requirements:</h2>
 <ul>
-    <li>Node.js from 18.0</li>
-    <li>Working terminal</li>
-    <li>MacOS/Linux</li>
+    <li>Node.js version 18.0 or higher</li>
+    <li>A Working terminal</li>
+    <li>Supported operating systems: MacOS, Linux, and Windows.</li>
 </ul>
 
 <h2>Installation instructions:<h2>
@@ -23,4 +23,4 @@ $ cd frontend-project-11.git
 $ npm ci
 $ npm start 
 ```  
-# the default port is 8081
+[//]: # (Please note) [//]: # (The application runs on its default port. If you need to change the port, refer to the configuration settings.)
