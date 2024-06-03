@@ -5,7 +5,7 @@ import axios from 'axios';
 import watch from './view.js';
 import resources from './locales/index.js';
 import parse from './rssParser.js';
-import yupLocale from './locales/yupLocale.js';
+import customErrors from './locales/yupLocale.js';
 
 const rssSchema = yup.object().shape({
   url: yup.string()
@@ -17,15 +17,7 @@ const rssSchema = yup.object().shape({
     .required(),
 });
 
-const elements = {
-  form: document.querySelector('form'),
-  inputEl: document.querySelector('input'),
-  example: document.querySelector('.mt-2'),
-  message: document.querySelector('.feedback'),
-  submitBtn: document.querySelector('button[type="submit"]'),
-};
-
-function checkAndAddNewPosts(newPosts, posts) {
+const checkAndAddNewPosts = (newPosts, posts) => {
   const existingLinks = new Set(posts.map((post) => post.id));
   newPosts.forEach((post) => {
     if (!existingLinks.has(post.id)) {
@@ -36,6 +28,13 @@ function checkAndAddNewPosts(newPosts, posts) {
 }
 
 const app = async () => {
+  const elements = {
+    form: document.querySelector('form'),
+    inputEl: document.querySelector('input'),
+    example: document.querySelector('.mt-2'),
+    message: document.querySelector('.feedback'),
+    submitBtn: document.querySelector('button[type="submit"]'),
+  };  
   console.log('app call', new Error().stack);
   const i18nInstance = i18next.createInstance();
   i18nInstance.init({
@@ -43,7 +42,7 @@ const app = async () => {
     debug: false,
     resources,
   }).then(() => {
-    yupLocale();
+    yup.setLocale(customErrors);
   }).catch((err) => {
     console.log('Error initializing i18next:', err);
   });
