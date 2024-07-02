@@ -135,15 +135,15 @@ const app = async () => {
         const currentUrl = state.rssForm.fields.url;
         state.rssForm.status = 'loading Rss';
         loadRss(currentUrl)
-          .catch(updateError)
-          .then((success) => {
-            if (!success) {
-              return;
-            }
+          .then(() => {
             state.rssForm.errors = {};
             state.rssForm.status = 'success';
             state.feeds = [...state.feeds, currentUrl];
             state.rssForm.fields.url = '';
+          })
+          .catch((error) => {
+            console.error('RSS loading failed:', error);
+            // Update error handling based on your application's needs
           });
       })
       .catch((err) => {
