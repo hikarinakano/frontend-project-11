@@ -35,7 +35,6 @@ const app = async () => {
     message: document.querySelector('.feedback'),
     submitBtn: document.querySelector('button[type="submit"]'),
   };
-  console.log('app call', new Error().stack);
   const i18nInstance = i18next.createInstance();
   i18nInstance.init({
     lng: 'ru',
@@ -80,15 +79,12 @@ const app = async () => {
   };
 
   const loadRss = (url) => {
-    console.log('getRequest call', new Error().stack);
     const proxiedUrl = addProxy(url);
     const getRequest = axios.get(proxiedUrl, { responseType: 'json' });
-    return getRequest
-      .then((response) => {
-        console.log('No Error', new Error().stack);
+    return new Promise((resolve, reject) => {
+      getRequest.then((response) => {
         const data = response.data.contents;
         const rssFeed = parse(data, url);
-        console.log('No Error', new Error().stack);
         const index = _.findIndex(state.rssFeeds, (feed) => feed.id === url);
         if (index < 0) {
           state.rssFeeds = [rssFeed, ...state.rssFeeds];
@@ -96,8 +92,12 @@ const app = async () => {
           const existingFeed = state.rssFeeds[index];
           state.rssFeeds[index].posts = checkAndAddNewPosts(rssFeed.posts, existingFeed.posts);
         }
-        return true;
+        resolve(true); // Resolve the promise with true indicating success
+      }).catch((error) => {
+        console.error('Error', new Error().stack);
+        reject(error); // Reject the promise with the error
       });
+    });
   };
 
   const updateError = (error) => {
@@ -110,15 +110,15 @@ const app = async () => {
     return false;
   };
 
-  const fnc = () => {
-    console.log('fnc call', new Error().stack);
-    state.feeds.map((url) => loadRss(url).catch(updateError));
+  const refreshFeeds = () => {
+    const feedPromises = state.feeds.map((url) => loadRss(url));
+    Promise.all(feedPromises)
+      .catch(updateError);
   };
 
   const refresh = () => {
-    console.log('not Error', new Error().stack);
     setTimeout(() => {
-      fnc();
+      refreshFeeds();
       refresh();
     }, 5000);
   };
