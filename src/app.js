@@ -126,8 +126,10 @@ const app = async () => {
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const link = elements.inputEl.value;
-    state.rssForm.fields.url = link;
+    const data = new FormData(e.target);
+    const url = data.get('url');
+    state.rssForm.fields.url = url;
+
     validate(state)
       .then(() => {
         const currentUrl = state.rssForm.fields.url;
