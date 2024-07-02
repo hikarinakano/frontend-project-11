@@ -92,10 +92,9 @@ const app = async () => {
           const existingFeed = state.rssFeeds[index];
           state.rssFeeds[index].posts = checkAndAddNewPosts(rssFeed.posts, existingFeed.posts);
         }
-        resolve(true); // Resolve the promise with true indicating success
+        resolve(true);
       }).catch((error) => {
-        console.error('Error', new Error().stack);
-        reject(error); // Reject the promise with the error
+        reject(error);
       });
     });
   };
@@ -126,7 +125,6 @@ const app = async () => {
   refresh();
 
   elements.form.addEventListener('submit', (e) => {
-    console.log('not Error', new Error().stack);
     e.preventDefault();
     const link = elements.inputEl.value;
     state.rssForm.fields.url = link;
@@ -147,7 +145,6 @@ const app = async () => {
           });
       })
       .catch((err) => {
-        console.log('Validation error', new Error().stack);
         state.rssForm.status = 'not validated';
         state.rssForm.errors = _.keyBy(err.inner, 'path');
       });
