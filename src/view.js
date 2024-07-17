@@ -10,15 +10,21 @@ export default (elements, i18n, state) => {
       rssForm: { errors, fields },
     } = state;
     submitBtn.disabled = false;
-    if (_.has(errors, ['url'])) {
+    if (_.has(errors, ['notUrl'])) {
       message.classList.remove('text-success');
       message.classList.add('text-danger');
       inputEl.classList.add('is-invalid');
-      message.textContent = i18n.t(errors.url.message);
+      message.textContent = i18n.t('errors.validation.notUrl');
+    }
+    if (_.has(errors, ['duplicateUrl'])) {
+      message.classList.remove('text-success');
+      message.classList.add('text-danger');
+      inputEl.classList.add('is-invalid');
+      message.textContent = i18n.t('errors.validation.duplicateUrl');
     }
     if (_.has(errors, ['networkError'])) {
       if (state.rssForm.status === 'loading Rss') {
-        message.innerHtml = '';
+        message.textContent = '';
         submitBtn.disabled = true;
         inputEl.classList.remove('is-invalid');
       }
@@ -62,6 +68,6 @@ export default (elements, i18n, state) => {
         message.textContent = i18n.t('success');
       }
     }
-    inputEl.value = fields.url;
+    inputEl.value = fields.input;
   });
 };
