@@ -7,15 +7,15 @@ import resources from './locales/index.js';
 import parse from './rssParser.js';
 import customErrors from './locales/yupLocale.js';
 
-const rssSchema = yup.object().shape({
-  url: yup.string()
-    .url('errors.validation.notUrl')
-    .test('uniqie-url', 'errors.validation.duplicateUrl', function feedsExclude(value) {
-      const { feeds } = this.options.context;
-      return !feeds.includes(value);
-    })
-    .required(),
-});
+// const rssSchema = yup.object().shape({
+//   url: yup.string()
+//     .url('errors.validation.notUrl')
+//     .test('uniqie-url', 'errors.validation.duplicateUrl', function feedsExclude(value) {
+//       const { feeds } = this.options.context;
+//       return !feeds.includes(value);
+//     })
+//     .required(),
+// });
 
 const checkAndAddNewPosts = (newPosts, posts) => {
   const existingLinks = new Set(posts.map((post) => post.id));
@@ -35,6 +35,7 @@ const app = async () => {
     message: document.querySelector('.feedback'),
     submitBtn: document.querySelector('button[type="submit"]'),
   };
+
   const i18nInstance = i18next.createInstance();
   i18nInstance.init({
     lng: 'ru',
@@ -49,7 +50,7 @@ const app = async () => {
   const state = watch(elements, i18nInstance, {
     rssForm: {
       fields: {
-        url: '',
+        input: '',
       },
       errors: {},
       status: '',
@@ -62,13 +63,35 @@ const app = async () => {
     },
   });
 
-  const validate = () => {
+  // const validate = () => {
+  //   state.rssForm.errors = {};
+  //   state.rssForm.status = 'being validated';
+  //   return rssSchema.validate(
+  //     state.rssForm.fields,
+  //     { context: state, abortEarly: false },
+  //   );
+  // };
+  const validateUrl = (url, urls) => {
     state.rssForm.errors = {};
+    state.rssForm.fields.input = url;
     state.rssForm.status = 'being validated';
-    return rssSchema.validate(
-      state.rssForm.fields,
-      { context: state, abortEarly: false },
-    );
+    const schema = yup.string()
+      .url(customErrors.string.url)
+      .required();
+    return schema
+      .notOneOf(urls, customErrors.string.test)
+      .validate(url)
+      .then(() => null)
+      .catch((error) => {
+        let errMsg;
+        if (error.message.key === 'notUrl') {
+          errMsg = 'Link should be valid URL';
+        } else if (error.message.key === 'duplicateUrl') {
+          errMsg = 'The URL exists already';
+        }
+        state.rssForm.errors = { [`${error.message.key}`]: errMsg };
+        return error;
+      });
   };
 
   const addProxy = (originUrl) => {
@@ -81,38 +104,37 @@ const app = async () => {
   const loadRss = (url) => {
     const proxiedUrl = addProxy(url);
     const getRequest = axios.get(proxiedUrl, { responseType: 'json' });
-    return new Promise((resolve, reject) => {
-      getRequest.then((response) => {
+    return getRequest
+      .then((response) => {
         const data = response.data.contents;
         const rssFeed = parse(data, url);
         const index = _.findIndex(state.rssFeeds, (feed) => feed.id === url);
         if (index < 0) {
           state.rssFeeds = [rssFeed, ...state.rssFeeds];
+          state.rssForm.status = 'success';
+          state.rssForm.errors = {};
+          state.feeds = [...state.feeds, url];
+          state.rssForm.fields.input = '';
         } else {
           const existingFeed = state.rssFeeds[index];
           state.rssFeeds[index].posts = checkAndAddNewPosts(rssFeed.posts, existingFeed.posts);
         }
-        resolve(true);
-      }).catch((error) => {
-        reject(error);
+      })
+      .catch((error) => {
+        state.rssForm.status = 'not loading';
+        if (error.message === 'Network Error') {
+          if (Object.keys(state.feeds).length === 0) {
+            state.rssForm.errors = { networkError: error.message };
+          } else {
+            console.error(`Error: ${error.message}`);
+          }
+        } else state.rssForm.errors = { parseError: error.message };
       });
-    });
-  };
-
-  const updateError = (error) => {
-    state.rssForm.status = 'not loading';
-    if (error.code === 'ERR_NETWORK') {
-      state.rssForm.errors = { networkError: error.message };
-    } else {
-      state.rssForm.errors = { parseError: error };
-    }
-    return false;
   };
 
   const refreshFeeds = () => {
     const feedPromises = state.feeds.map((url) => loadRss(url));
-    Promise.all(feedPromises)
-      .catch(updateError);
+    Promise.all(feedPromises);
   };
 
   const refresh = () => {
@@ -128,23 +150,13 @@ const app = async () => {
     e.preventDefault();
     const data = new FormData(e.target);
     const url = data.get('url');
-    state.rssForm.fields.url = url;
-
-    validate(state)
-      .then(() => {
-        const currentUrl = state.rssForm.fields.url;
-        state.rssForm.status = 'loading Rss';
-        loadRss(currentUrl)
-          .then(() => {
-            state.rssForm.errors = {};
-            state.rssForm.status = 'success';
-            state.feeds = [...state.feeds, currentUrl];
-            state.rssForm.fields.url = '';
-          })
-          .catch((error) => {
-            console.error('RSS loading failed:', error);
-            // Update error handling based on your application's needs
-          });
+    validateUrl(url, state.feeds)
+      .then((error) => {
+        if (!error) {
+          state.rssForm.errors = {};
+          state.rssForm.status = 'loading Rss';
+          loadRss(url);
+        }
       })
       .catch((err) => {
         state.rssForm.status = 'not validated';
