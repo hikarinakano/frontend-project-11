@@ -15,19 +15,18 @@ const parseRssXml = (xml, url) => {
   const feedTitle = feed.querySelector('title').textContent;
   const feedDesc = feed.querySelector('description').textContent;
 
-  const rssFeed = {
+  return {
     id: url,
     feedTitle,
     feedDesc,
     posts: parsePostsXml(posts),
   };
-  return rssFeed;
 };
 
-const parse = (data, url) => {
+const parseFeed = (data, url) => {
   const parser = new DOMParser();
   const xml = parser.parseFromString(data, 'text/xml');
   return parseRssXml(xml, url);
 };
 
-export default parse;
+export default parseFeed;

@@ -4,7 +4,7 @@ import i18next from 'i18next';
 import axios from 'axios';
 import watch from './view.js';
 import resources from './locales/index.js';
-import parse from './rssParser.js';
+import parseFeed from './rssParser.js';
 import customErrors from './locales/yupLocale.js';
 
 const checkAndAddNewPosts = (newPosts, posts) => {
@@ -89,17 +89,17 @@ const app = async () => {
     return getRequest
       .then((response) => {
         const data = response.data.contents;
-        const rssFeed = parse(data, url);
-        const index = _.findIndex(state.posts, (feed) => feed.id === url);
+        const feed = parseFeed(data, url);
+        const index = _.findIndex(state.feeds, (feed) => feed.id === url);
         if (index < 0) {
-          state.posts = [rssFeed, ...state.posts];
+          state.posts = [...feed.posts, ...state.posts];
           state.rssForm.status = 'success';
           state.rssForm.errors = {};
-          state.feeds = [...state.feeds, url];
+          state.feeds = [...state.feeds, feed];
           state.rssForm.fields.input = '';
         } else {
-          const existingFeed = state.posts[index];
-          state.posts[index].posts = checkAndAddNewPosts(rssFeed.posts, existingFeed.posts);
+          const existingFeed = state.feeds[index];
+          state.feeds[index].posts = checkAndAddNewPosts(feed.posts, existingFeed.posts);
         }
       })
       .catch((error) => {
@@ -115,7 +115,8 @@ const app = async () => {
   };
 
   const refreshFeeds = () => {
-    const feedPromises = state.feeds.map((url) => loadRss(url));
+    const feedPromises = state.feeds.map(({ id }) => loadRss(id));
+
     Promise.all(feedPromises);
   };
 
