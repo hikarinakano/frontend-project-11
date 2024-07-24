@@ -7,16 +7,6 @@ import resources from './locales/index.js';
 import parse from './rssParser.js';
 import customErrors from './locales/yupLocale.js';
 
-// const rssSchema = yup.object().shape({
-//   url: yup.string()
-//     .url('errors.validation.notUrl')
-//     .test('uniqie-url', 'errors.validation.duplicateUrl', function feedsExclude(value) {
-//       const { feeds } = this.options.context;
-//       return !feeds.includes(value);
-//     })
-//     .required(),
-// });
-
 const checkAndAddNewPosts = (newPosts, posts) => {
   const existingLinks = new Set(posts.map((post) => post.id));
   newPosts.forEach((post) => {
@@ -63,14 +53,6 @@ const app = async () => {
     },
   });
 
-  // const validate = () => {
-  //   state.rssForm.errors = {};
-  //   state.rssForm.status = 'being validated';
-  //   return rssSchema.validate(
-  //     state.rssForm.fields,
-  //     { context: state, abortEarly: false },
-  //   );
-  // };
   const validateUrl = (url, urls) => {
     state.rssForm.errors = {};
     state.rssForm.fields.input = url;
