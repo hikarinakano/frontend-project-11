@@ -46,7 +46,7 @@ const app = async () => {
       status: '',
     },
     feeds: [],
-    rssFeeds: [],
+    posts: [],
     ui: {
       openedLinks: new Set(),
       id: null,
@@ -90,16 +90,16 @@ const app = async () => {
       .then((response) => {
         const data = response.data.contents;
         const rssFeed = parse(data, url);
-        const index = _.findIndex(state.rssFeeds, (feed) => feed.id === url);
+        const index = _.findIndex(state.posts, (feed) => feed.id === url);
         if (index < 0) {
-          state.rssFeeds = [rssFeed, ...state.rssFeeds];
+          state.posts = [rssFeed, ...state.posts];
           state.rssForm.status = 'success';
           state.rssForm.errors = {};
           state.feeds = [...state.feeds, url];
           state.rssForm.fields.input = '';
         } else {
-          const existingFeed = state.rssFeeds[index];
-          state.rssFeeds[index].posts = checkAndAddNewPosts(rssFeed.posts, existingFeed.posts);
+          const existingFeed = state.posts[index];
+          state.posts[index].posts = checkAndAddNewPosts(rssFeed.posts, existingFeed.posts);
         }
       })
       .catch((error) => {
