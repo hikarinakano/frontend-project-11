@@ -31,7 +31,7 @@ const app = async () => {
   const elements = {
     form: document.querySelector('form'),
     inputEl: document.querySelector('input'),
-    example: document.querySelector('.mt-2'),
+    example: document.querySelector('.example'),
     message: document.querySelector('.feedback'),
     submitBtn: document.querySelector('button[type="submit"]'),
   };
