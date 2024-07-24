@@ -95,8 +95,8 @@ const createPosts = (state, posts, postsHeader, viewButton, ul) => {
 };
 
 export default function render(state, [postsHeader, feedsHeader, viewButton]) {
-  const { rssFeeds } = state;
-  if (rssFeeds.length !== 0) {
+  const { posts } = state;
+  if (posts.length !== 0) {
     const feedsDiv = document.querySelector('.feeds');
     feedsDiv.innerHTML = '';
 
@@ -118,7 +118,7 @@ export default function render(state, [postsHeader, feedsHeader, viewButton]) {
     ul.classList.add('list-group', 'border-0', 'rounded-0');
     const postsUl = document.createElement('ul');
     postsUl.classList.add('list-group', 'border-0', 'rounded-0');
-    rssFeeds.forEach(({ feedTitle, feedDesc, posts }) => {
+    posts.forEach(({ feedTitle, feedDesc, posts }) => {
       const li = document.createElement('li');
       li.classList.add('list-group-item', 'border-0', 'border-end-0');
 
