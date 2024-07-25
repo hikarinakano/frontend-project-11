@@ -84,9 +84,8 @@ const app = async () => {
         const index = _.findIndex(state.feeds, (feed) => feed.id === url);
         if (index < 0) {
           state.posts = [...feed.posts, ...state.posts];
-          state.rssForm.status = 'success';
-          state.rssForm.errors = {};
           state.feeds = [...state.feeds, feed];
+          state.rssForm.status = 'success';
           state.rssForm.fields.input = '';
         } else {
           const existingFeed = state.feeds[index];
@@ -94,19 +93,20 @@ const app = async () => {
         }
       })
       .catch((error) => {
+        let errorCode;
         state.rssForm.status = 'not loading';
         if (error.message === 'Network Error') {
-          if (Object.keys(state.feeds).length === 0) {
-            state.rssForm.currentError = 'networkError';
-          } else {
-            console.error(`Error: ${error.message}`);
-          }
-        } else state.rssForm.currentError = 'parseError';
+          errorCode = 'networkError';
+        // } else {
+        //     console.error(`Error: ${error.message}`);
+        // }
+        } else errorCode = error.message;
+        return Promise.reject(errorCode);
       });
   };
   const refreshTimeout = 5000;
   const refreshFeeds = () => {
-    const feedPromises = state.feeds.map((url) => loadRss(url));
+    const feedPromises = state.feeds.map(({ id }) => loadRss(id));
     return Promise.all(feedPromises);
   };
 
@@ -126,13 +126,15 @@ const app = async () => {
     state.rssForm.fields.input = url;
     validateUrl(url, state.feeds)
       .then((error) => {
-        console.log(error)
         if (!error) {
           state.rssForm.currentError = '';
           state.rssForm.status = 'loading Rss';
-          loadRss(url);
+          loadRss(url)
+          .catch(err => state.rssForm.currentError = err)
         }
-        else state.rssForm.currentError = error;
+        else {
+          state.rssForm.currentError = error
+        };
       })
   });
 };
