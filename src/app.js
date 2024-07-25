@@ -97,8 +97,9 @@ const app = async () => {
         state.rssForm.status = 'not loading';
         if (error.message === 'Network Error') {
           errorCode = 'networkError';
+          console.error(error.stack)
         } else errorCode = error.message;
-        return Promise.reject(errorCode);
+        state.rssForm.currentError = errorCode;
       });
   };
   const refreshTimeout = 5000;
@@ -126,11 +127,10 @@ const app = async () => {
         if (!error) {
           state.rssForm.currentError = '';
           state.rssForm.status = 'loading Rss';
-          loadRss(url)
-          .catch(err => state.rssForm.currentError = err)
+          loadRss(url);
         }
         else {
-          state.rssForm.currentError = error
+          state.rssForm.currentError = error;
         };
       })
   });
