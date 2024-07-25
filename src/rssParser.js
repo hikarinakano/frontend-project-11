@@ -26,7 +26,10 @@ const parseRssXml = (xml, url) => {
 const parseFeed = (data, url) => {
   const parser = new DOMParser();
   const xml = parser.parseFromString(data, 'text/xml');
-  return parseRssXml(xml, url);
+  if (xml.getElementsByTagName('parsererror').length === 1) {
+    throw new Error ('parseError');
+  }
+  else return parseRssXml(xml, url);
 };
 
 export default parseFeed;
