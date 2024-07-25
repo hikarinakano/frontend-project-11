@@ -141,10 +141,6 @@ const app = async () => {
           loadRss(url);
         }
       })
-      .catch((err) => {
-        state.rssForm.status = 'not validated';
-        state.rssForm.errors = _.keyBy(err.inner, 'path');
-      });
   });
 };
 
