@@ -113,18 +113,16 @@ const app = async () => {
         } else state.rssForm.errors = { parseError: error.message };
       });
   };
-
+  const refreshTimeout = 5000;
   const refreshFeeds = () => {
-    const feedPromises = state.feeds.map(({ id }) => loadRss(id));
-
-    Promise.all(feedPromises);
+    const feedPromises = state.feeds.map((url) => loadRss(url));
+    return Promise.all(feedPromises);
   };
 
   const refresh = () => {
-    setTimeout(() => {
-      refreshFeeds();
-      refresh();
-    }, 5000);
+    refreshFeeds().then(() => {
+      setTimeout(refresh, refreshTimeout)
+    });
   };
 
   refresh();
