@@ -65,13 +65,7 @@ const app = async () => {
       .validate(url)
       .then(() => null)
       .catch((error) => {
-        let errMsg;
-        if (error.message.key === 'notUrl') {
-          errMsg = 'Link should be valid URL';
-        } else if (error.message.key === 'duplicateUrl') {
-          errMsg = 'The URL exists already';
-        }
-        state.rssForm.errors = { [`${error.message.key}`]: errMsg };
+        state.rssForm.errors = { [`${error.message.key}`]: `${error.message.key}` };
         return error;
       });
   };
