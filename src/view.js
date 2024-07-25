@@ -7,22 +7,22 @@ export default (elements, i18n, state) => {
   const [postsTr, feedsTr, viewButton] = [i18n.t('posts'), i18n.t('feeds'), i18n.t('viewButton')];
   return onChange(state, () => {
     const {
-      rssForm: { errors, fields },
+      rssForm: { currentError, fields },
     } = state;
     submitBtn.disabled = false;
-    if (_.has(errors, ['notUrl'])) {
+    if (currentError === 'notUrl') {
       message.classList.remove('text-success');
       message.classList.add('text-danger');
       inputEl.classList.add('is-invalid');
       message.textContent = i18n.t('errors.validation.notUrl');
     }
-    if (_.has(errors, ['duplicateUrl'])) {
+    if (currentError === 'duplicateUrl') {
       message.classList.remove('text-success');
       message.classList.add('text-danger');
       inputEl.classList.add('is-invalid');
       message.textContent = i18n.t('errors.validation.duplicateUrl');
     }
-    if (_.has(errors, ['networkError'])) {
+    if (currentError === 'networkError') {
       if (state.rssForm.status === 'loading Rss') {
         message.textContent = '';
         submitBtn.disabled = true;
@@ -38,7 +38,7 @@ export default (elements, i18n, state) => {
         return;
       }
     }
-    if (_.has(errors, ['parseError'])) {
+    if (currentError === 'parseError') {
       if (state.rssForm.status === 'loading Rss') {
         inputEl.classList.remove('is-invalid');
         message.textContent = '';
@@ -52,7 +52,7 @@ export default (elements, i18n, state) => {
       }
     }
 
-    if (_.isEmpty(errors)) {
+    if (currentError === '') {
       if (state.rssForm.status === 'loading Rss') {
         inputEl.classList.remove('is-invalid');
         message.textContent = '';
