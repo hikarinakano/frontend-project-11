@@ -97,9 +97,6 @@ const app = async () => {
         state.rssForm.status = 'not loading';
         if (error.message === 'Network Error') {
           errorCode = 'networkError';
-        // } else {
-        //     console.error(`Error: ${error.message}`);
-        // }
         } else errorCode = error.message;
         return Promise.reject(errorCode);
       });
