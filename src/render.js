@@ -1,4 +1,3 @@
-
 const modalEl = {
   header: document.querySelector('.modal-header'),
   body: document.querySelector('.modal-body'),
