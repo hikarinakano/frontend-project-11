@@ -1,5 +1,3 @@
-// example feeds : https://lorem-rss.hexlet.app/feed?length=42
-// another is  https://ru.hexlet.io/lessons.rss
 
 const modalEl = {
   header: document.querySelector('.modal-header'),
