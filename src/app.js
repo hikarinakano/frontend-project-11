@@ -35,7 +35,7 @@ const addProxy = (originUrl) => {
   return proxyUrl.toString();
 };
 
-const app = async () => {
+const app = () => {
   const elements = {
     form: document.querySelector('form'),
     inputEl: document.querySelector('input'),
@@ -117,7 +117,8 @@ const app = async () => {
       const url = data.get('url');
       state.rssForm.status = 'being validated';
       state.rssForm.fields.input = url;
-      validateUrl(url, state.feeds)
+      const urls = _.map(state.feeds, (feed) => feed.id);
+      validateUrl(url, urls)
         .then((error) => {
           if (!error) {
             state.rssForm.currentError = '';
@@ -129,7 +130,7 @@ const app = async () => {
         });
     });
   }).catch((err) => {
-    console.log('Error initializing i18next:', err);
+    console.error('Error initializing i18next:', err);
   });
 };
 
