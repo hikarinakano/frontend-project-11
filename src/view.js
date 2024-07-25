@@ -1,5 +1,4 @@
 import onChange from 'on-change';
-import _ from 'lodash';
 import render from './render.js';
 
 export default (elements, i18n, state) => {
