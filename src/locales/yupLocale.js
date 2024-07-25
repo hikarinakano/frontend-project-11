@@ -1,6 +1,3 @@
-// import * as yup from 'yup';
-
-// const yupLocale = () => yup.setLocale();
 
 const customErrors = {
   mixed: {
