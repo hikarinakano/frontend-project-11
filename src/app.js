@@ -42,7 +42,7 @@ const app = async () => {
       fields: {
         input: '',
       },
-      errors: {},
+      currentError: '',
       status: '',
     },
     feeds: [],
