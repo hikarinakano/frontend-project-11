@@ -54,9 +54,7 @@ const app = async () => {
   });
 
   const validateUrl = (url, urls) => {
-    state.rssForm.errors = {};
-    state.rssForm.fields.input = url;
-    state.rssForm.status = 'being validated';
+
     const schema = yup.string()
       .url(customErrors.string.url)
       .required();
@@ -65,8 +63,7 @@ const app = async () => {
       .validate(url)
       .then(() => null)
       .catch((error) => {
-        state.rssForm.errors = { [`${error.message.key}`]: `${error.message.key}` };
-        return error;
+        return `${error.message.key}`;
       });
   };
 
@@ -100,11 +97,11 @@ const app = async () => {
         state.rssForm.status = 'not loading';
         if (error.message === 'Network Error') {
           if (Object.keys(state.feeds).length === 0) {
-            state.rssForm.errors = { networkError: error.message };
+            state.rssForm.currentError = 'networkError';
           } else {
             console.error(`Error: ${error.message}`);
           }
-        } else state.rssForm.errors = { parseError: error.message };
+        } else state.rssForm.currentError = 'parseError';
       });
   };
   const refreshTimeout = 5000;
@@ -125,13 +122,17 @@ const app = async () => {
     e.preventDefault();
     const data = new FormData(e.target);
     const url = data.get('url');
+    state.rssForm.status = 'being validated';
+    state.rssForm.fields.input = url;
     validateUrl(url, state.feeds)
       .then((error) => {
+        console.log(error)
         if (!error) {
-          state.rssForm.errors = {};
+          state.rssForm.currentError = '';
           state.rssForm.status = 'loading Rss';
           loadRss(url);
         }
+        else state.rssForm.currentError = error;
       })
   });
 };
