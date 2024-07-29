@@ -40,7 +40,7 @@ const addProxy = (originUrl) => {
 const app = () => {
   const elements = {
     form: document.querySelector('form'),
-    inputEl: document.querySelector('input'),
+    input: document.querySelector('input'),
     example: document.querySelector('.example'),
     message: document.querySelector('.feedback'),
     submitBtn: document.querySelector('button[type="submit"]'),
