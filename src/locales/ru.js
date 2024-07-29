@@ -7,11 +7,9 @@ export default {
     posts: 'Посты',
     viewButton: 'Просмотр',
     errors: {
-      validation: {
-        notUrl: 'Ссылка должна быть валидным URL',
-        duplicateUrl: 'RSS уже существует',
-      },
-      noRssFound: 'Ресурс не содержит валидный RSS',
+      notUrl: 'Ссылка должна быть валидным URL',
+      duplicateUrl: 'RSS уже существует',
+      parseError: 'Ресурс не содержит валидный RSS',
       networkError: 'Ошибка сети',
     },
     success: 'RSS успешно загружен',
