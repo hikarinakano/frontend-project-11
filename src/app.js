@@ -7,6 +7,8 @@ import resources from './locales/index.js';
 import parseFeed from './rssParser.js';
 import customErrors from './locales/yupLocale.js';
 
+const refreshTimeout = 5000;
+
 const checkAndAddNewPosts = (newPosts, posts) => {
   const existingLinks = new Set(posts.map((post) => post.id));
   newPosts.forEach((post) => {
@@ -25,7 +27,7 @@ const validateUrl = (url, urls) => {
     .notOneOf(urls, customErrors.string.test)
     .validate(url)
     .then(() => null)
-    .catch((error) => `${error.message.key}`);
+    .catch((error) => error.message.key);
 };
 
 const addProxy = (originUrl) => {
@@ -87,17 +89,14 @@ const app = () => {
           }
         })
         .catch((error) => {
-          let errorCode;
           state.rssForm.status = 'not loading';
           if (error.code === 'ERR_NETWORK') {
             errorCode = 'networkError';
-            console.error(error.stack);
           } else errorCode = error.message;
           state.rssForm.currentError = errorCode;
         });
     };
 
-    const refreshTimeout = 5000;
     const refreshFeeds = () => {
       const feedPromises = state.feeds.map(({ id }) => loadRss(id));
       return Promise.all(feedPromises);
