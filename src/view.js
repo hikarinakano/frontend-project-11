@@ -1,60 +1,41 @@
 import onChange from 'on-change';
 import render from './render.js';
 
+const invalidMessage = (message, input, i18n, error) => {
+  message.classList.remove('text-success');
+  message.classList.add('text-danger');
+  input.classList.add('is-invalid');
+  message.textContent = i18n.t(`errors.${error}`);
+}
 export default (elements, i18n, state) => {
   const { input, message, submitBtn } = elements;
   const [postsTr, feedsTr, viewButton] = [i18n.t('posts'), i18n.t('feeds'), i18n.t('viewButton')];
   return onChange(state, () => {
     const {
-      rssForm: { currentError, fields },
+      rssForm: { error, fields, status },
     } = state;
     submitBtn.disabled = false;
-    if (currentError === 'notUrl') {
-      message.classList.remove('text-success');
-      message.classList.add('text-danger');
-      input.classList.add('is-invalid');
-      message.textContent = i18n.t('errors.validation.notUrl');
-    }
-    if (currentError === 'duplicateUrl') {
-      message.classList.remove('text-success');
-      message.classList.add('text-danger');
-      input.classList.add('is-invalid');
-      message.textContent = i18n.t('errors.validation.duplicateUrl');
-    }
-    if (currentError === 'networkError') {
-      if (state.rssForm.status === 'loading Rss') {
-        message.textContent = '';
-        submitBtn.disabled = true;
-        input.classList.remove('is-invalid');
-      }
-      if (state.rssForm.status === 'not loading') {
-        message.classList.remove('text-success');
-        message.classList.add('text-danger');
-        input.classList.add('is-invalid');
-        message.textContent = i18n.t('errors.networkError');
-      }
-    }
-    if (currentError === 'parseError') {
-      if (state.rssForm.status === 'loading Rss') {
-        input.classList.remove('is-invalid');
-        message.textContent = '';
-        submitBtn.disabled = true;
-      }
-      if (state.rssForm.status === 'not loading') {
-        message.classList.remove('text-success');
-        message.classList.add('text-danger');
-        input.classList.add('is-invalid');
-        message.textContent = i18n.t('errors.noRssFound');
-      }
-    }
 
-    if (currentError === '') {
-      if (state.rssForm.status === 'loading Rss') {
+    if (error === 'notUrl' || error === 'duplicateUrl') {
+      invalidMessage(message, input, i18n, error);
+    }
+    if (error === 'networkError' || error === 'parseError') {
+      if (status === 'loading Rss') {
+        message.textContent = '';
+        submitBtn.disabled = true;
+        input.classList.remove('is-invalid');
+      }
+      if (status === 'not loading') {
+        invalidMessage(message, input, i18n, error);
+      }
+    }
+    if (error === '') {
+      if (status === 'loading Rss') {
         input.classList.remove('is-invalid');
         message.textContent = '';
         submitBtn.disabled = true;
       }
-      if (state.rssForm.status === 'success') {
+      if (status === 'success') {
         input.focus();
         render(state, [postsTr, feedsTr, viewButton]);
 
