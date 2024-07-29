@@ -33,9 +33,6 @@ export default (elements, i18n, state) => {
         inputEl.classList.add('is-invalid');
         message.textContent = i18n.t('errors.networkError');
       }
-      if (state.rssForm.status === 'no internet') {
-        return;
-      }
     }
     if (currentError === 'parseError') {
       if (state.rssForm.status === 'loading Rss') {
