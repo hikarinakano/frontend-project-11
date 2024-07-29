@@ -28,7 +28,8 @@ const parseFeed = (data, url) => {
   const xml = parser.parseFromString(data, 'text/xml');
   if (xml.getElementsByTagName('parsererror').length === 1) {
     throw new Error('parseError');
-  } else return parseRssXml(xml, url);
+  } 
+  return parseRssXml(xml, url);
 };
 
 export default parseFeed;
