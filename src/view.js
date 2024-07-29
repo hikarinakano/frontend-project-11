@@ -1,12 +1,6 @@
 import onChange from 'on-change';
 import render from './render.js';
 
-const invalidMessage = (message, input, i18n, error) => {
-  message.classList.remove('text-success');
-  message.classList.add('text-danger');
-  input.classList.add('is-invalid');
-  message.textContent = i18n.t(`errors.${error}`);
-}
 export default (elements, i18n, state) => {
   const { input, message, submitBtn } = elements;
   const [postsTr, feedsTr, viewButton] = [i18n.t('posts'), i18n.t('feeds'), i18n.t('viewButton')];
@@ -14,10 +8,17 @@ export default (elements, i18n, state) => {
     const {
       rssForm: { error, fields, status },
     } = state;
+
+    const invalidMessage = () => {
+      message.classList.remove('text-success');
+      message.classList.add('text-danger');
+      input.classList.add('is-invalid');
+      message.textContent = i18n.t(`errors.${error}`);
+    };
     submitBtn.disabled = false;
 
     if (error === 'notUrl' || error === 'duplicateUrl') {
-      invalidMessage(message, input, i18n, error);
+      invalidMessage();
     }
     if (error === 'networkError' || error === 'parseError') {
       if (status === 'loading Rss') {
@@ -26,7 +27,7 @@ export default (elements, i18n, state) => {
         input.classList.remove('is-invalid');
       }
       if (status === 'not loading') {
-        invalidMessage(message, input, i18n, error);
+        invalidMessage();
       }
     }
     if (error === '') {
