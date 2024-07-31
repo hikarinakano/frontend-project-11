@@ -37,9 +37,8 @@ const createPosts = (state, posts, postsHeader, viewButton, ul) => {
   header.innerText = postsHeader;
 
   bodyDiv.insertAdjacentElement('beforeend', header);
-
   posts.forEach(({
-    id, title,
+    url, title, id,
   }) => {
     const li = document.createElement('li');
     li.classList.add(
@@ -53,7 +52,7 @@ const createPosts = (state, posts, postsHeader, viewButton, ul) => {
 
     const a = document.createElement('a');
     a.classList.add('fw-bold');
-    a.setAttribute('href', id);
+    a.setAttribute('href', url);
     a.setAttribute('data-id', id);
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener noreferrer');
@@ -92,7 +91,7 @@ const createPosts = (state, posts, postsHeader, viewButton, ul) => {
 };
 
 export default function render(state, [postsHeader, feedsHeader, viewButton]) {
-  const { feeds } = state;
+  const { feeds, posts } = state;
   if (feeds.length !== 0) {
     const feedsDiv = document.querySelector('.feeds');
     feedsDiv.innerHTML = '';
@@ -115,7 +114,7 @@ export default function render(state, [postsHeader, feedsHeader, viewButton]) {
     ul.classList.add('list-group', 'border-0', 'rounded-0');
     const postsUl = document.createElement('ul');
     postsUl.classList.add('list-group', 'border-0', 'rounded-0');
-    feeds.forEach(({ feedTitle, feedDesc, posts }) => {
+    feeds.forEach(({ feedTitle, feedDesc }) => {
       const li = document.createElement('li');
       li.classList.add('list-group-item', 'border-0', 'border-end-0');
 
