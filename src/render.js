@@ -5,16 +5,16 @@ const modalEl = {
 };
 
 const renderModal = (posts, uiId) => {
-  const { title, desc, id } = posts.find((post) => post.id === uiId);
+  const { title, desc, url } = posts.find((post) => post.url === uiId);
   modalEl.header.textContent = title;
   modalEl.body.textContent = desc;
-  modalEl.openLinkButton.href = id;
+  modalEl.openLinkButton.href = url;
 };
 
-const changeVisitedLinks = ({ id }) => {
+const changeVisitedLinks = ({ url }) => {
   const links = document.querySelectorAll('a[data-id].fw-bold');
   Array.from(links).forEach((link) => {
-    if (link.href === id) {
+    if (link.href === url) {
       link.classList.remove('fw-bold');
       link.classList.add('fw-normal', 'link-secondary');
     }
@@ -37,6 +37,7 @@ const createPosts = (state, posts, postsHeader, viewButton, ul) => {
   header.innerText = postsHeader;
 
   bodyDiv.insertAdjacentElement('beforeend', header);
+  
   posts.forEach(({
     url, title, id,
   }) => {
@@ -58,8 +59,8 @@ const createPosts = (state, posts, postsHeader, viewButton, ul) => {
     a.setAttribute('rel', 'noopener noreferrer');
     a.textContent = title;
     a.addEventListener('click', () => {
-      ui.openedLinks.add(id);
-      ui.id = id;
+      ui.openedLinks.add(url);
+      ui.id = url;
       changeVisitedLinks(ui);
     });
 
@@ -74,10 +75,10 @@ const createPosts = (state, posts, postsHeader, viewButton, ul) => {
     button.textContent = viewButton;
 
     button.addEventListener('click', () => {
-      ui.openedLinks.add(id);
-      ui.id = id;
+      ui.openedLinks.add(url);
+      ui.id = url;
       changeVisitedLinks(ui);
-      renderModal(posts, ui.id);
+      renderModal(posts, url);
     });
 
     li.insertAdjacentElement('beforeend', button);
