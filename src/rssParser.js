@@ -4,8 +4,6 @@ import _ from 'lodash';
 const parsePostsXml = (posts) => [...posts].map((item) => {
   const title = item.querySelector('title').textContent;
   const desc = item.querySelector('description').textContent;
-  // const postId = _.uniqueId();
-  // const url = item.querySelector('link').textContent;
   return {
     title,
     desc,
