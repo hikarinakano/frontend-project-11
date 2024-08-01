@@ -37,7 +37,7 @@ const createPosts = (state, posts, postsHeader, viewButton, ul) => {
   header.innerText = postsHeader;
 
   bodyDiv.insertAdjacentElement('beforeend', header);
-  
+
   posts.forEach(({
     url, title, id,
   }) => {
