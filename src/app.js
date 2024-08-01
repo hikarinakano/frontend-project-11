@@ -8,18 +8,16 @@ import parseFeed from './rssParser.js';
 import customErrors from './locales/yupLocale.js';
 
 const refreshTimeout = 5000;
+
 const checkAndAddNewPosts = (newPosts, oldPosts) => {
-  console.log('new Posts', newPosts);
-  console.log('old Posts', oldPosts)
-  //maybe ids should be added here?
   const existingPosts = new Set(oldPosts.map((post) => post.title));
-  // filter Old posts by new posts;
+  let updatedPosts = [...oldPosts];
   newPosts.forEach((post) => {
     if (!existingPosts.has(post.title) && !existingPosts.has(post.url)) {
-      oldPosts = [...oldPosts, post];
+      updatedPosts = [...updatedPosts, post];
     }
   });
-  return oldPosts;
+  return updatedPosts;
 };
 
 const validateUrl = (url, urls) => {
@@ -39,7 +37,6 @@ const addProxy = (originUrl) => {
   proxyUrl.searchParams.set('disableCache', 'true');
   return proxyUrl.toString();
 };
-
 
 const app = () => {
   const elements = {
@@ -72,31 +69,45 @@ const app = () => {
         openedLinks: new Set(),
         id: null,
       },
-    })
+    });
 
-    // write handle errors function 
+    // write handle errors function
     const loadRss = (url) => {
       const feedUrl = url.toString();
       const proxiedUrl = addProxy(url);
       const getRequest = axios.get(proxiedUrl, { responseType: 'json' });
       return getRequest
         .then((response) => {
-
           const data = response.data.contents;
           const feedId = state.feeds.length + 1;
           const feed = parseFeed(data);
           feed.id = feedId;
           feed.url = feedUrl;
-          const { feedTitle, feedDesc, id, url, posts } = feed;
-          console.log('feed is ', feed)
+          const {
+            feedTitle,
+            feedDesc,
+            posts,
+            id,
+          } = feed;
+
           const index = _.findIndex(state.feeds, (stateFeed) => stateFeed.url === url);
-          console.log('index', index)
           if (index < 0) {
-            state.feeds = [...state.feeds, { feedTitle, feedDesc, id, url }];
-            posts.forEach(post => {
-              post.feedId = feed.id;
-              post.id = _.uniqueId();
-            })
+            state.feeds = [
+              ...state.feeds,
+              {
+                feedTitle,
+                feedDesc,
+                id,
+                url,
+              },
+            ];
+
+            posts.forEach((post) => ({
+              ...post,
+              feedId: feed.id,
+              id: _.uniqueId(),
+            }));
+
             state.posts = [...posts, ...state.posts];
             state.rssForm.status = 'success';
             state.rssForm.fields.input = '';
@@ -105,7 +116,6 @@ const app = () => {
           }
         })
         .catch((error) => {
-          console.log(error)
           if (error.code === 'ERR_NETWORK') {
             state.rssForm.error = 'networkError';
           } else state.rssForm.error = error.message;
@@ -139,9 +149,9 @@ const app = () => {
             state.rssForm.error = '';
             state.rssForm.status = 'loading Rss';
             loadRss(url);
-            console.log(state.feeds)
           } else {
-            // change the state status here so the error will be displayed accordingly to state, not text
+            // change the state status here so the error
+            // will be displayed accordingly to state, not text
             state.rssForm.error = error;
           }
         });
