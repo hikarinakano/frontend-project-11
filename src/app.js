@@ -75,6 +75,16 @@ const app = () => {
     });
 
     // write handle errors function
+    const errorHandler = (error) => {
+      state.rssForm.status = 'fail';
+      if (typeof error === 'string') {
+        state.rssForm.error = error;
+      }
+      else if (error.code === 'ERR_NETWORK') {
+        state.rssForm.error = 'networkError';
+      }
+      else state.rssForm.error = error.message;
+    }
 
     const loadRss = (url) => {
       const feedUrl = url.toString();
@@ -107,7 +117,7 @@ const app = () => {
           }
         })
         .catch((error) => {
-          return error;
+          errorHandler(error);
         });
     };
 
@@ -137,11 +147,7 @@ const app = () => {
             state.rssForm.status = 'loading Rss';
             loadRss(url);
           } else {
-            // change the state status here so the error
-            // will be displayed accordingly to state, not text
-            console.log('final catch error', error)
-            state.rssForm.error = error;
-            state.rssForm.status = 'fail';
+            errorHandler(error);
           }
         });
     });
