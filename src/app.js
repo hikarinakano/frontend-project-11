@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import _ from 'lodash';
+import _, { get } from 'lodash';
 import i18next from 'i18next';
 import axios from 'axios';
 import watch from './view.js';
@@ -9,14 +9,15 @@ import customErrors from './locales/yupLocale.js';
 
 const refreshTimeout = 5000;
 
-const checkAndAddNewPosts = (newPosts, oldPosts) => {
-  const existingPosts = new Set(oldPosts.map((post) => post.title));
-  let updatedPosts = [...oldPosts];
-  newPosts.forEach((post) => {
-    if (!existingPosts.has(post.title) && !existingPosts.has(post.url)) {
-      updatedPosts = [...updatedPosts, post];
-    }
-  });
+const checkAndAddNewPosts = (newPosts, oldPosts, feedId) => {
+  const uniqueNewPosts = newPosts.filter(newPost =>
+    !oldPosts.some(oldPost => oldPost.title === newPost.title || oldPost.url === newPost.url)
+  );
+  const postsWithFeedId = uniqueNewPosts.map(post => ({
+    ...post,
+    feedId: feedId
+  }));
+  const updatedPosts = [...oldPosts, ...postsWithFeedId];
   return updatedPosts;
 };
 
@@ -79,40 +80,24 @@ const app = () => {
       return getRequest
         .then((response) => {
           const data = response.data.contents;
-          const feedId = state.feeds.length + 1;
+          let feedId;
           const feed = parseFeed(data);
-          feed.id = feedId;
-          feed.url = feedUrl;
-          const {
-            feedTitle,
-            feedDesc,
-            posts,
-            id,
-          } = feed;
-
-          const index = _.findIndex(state.feeds, (stateFeed) => stateFeed.url === url);
-          if (index < 0) {
-            state.feeds = [
-              ...state.feeds,
-              {
-                feedTitle,
-                feedDesc,
-                id,
-                url,
-              },
-            ];
-
-            posts.forEach((post) => ({
+          const { feedTitle, feedDesc, posts } = feed;
+          const postswithIds = posts.map((post) => ({
               ...post,
-              feedId: feed.id,
+              feedId,
               id: _.uniqueId(),
             }));
-
-            state.posts = [...posts, ...state.posts];
+          const index = _.findIndex(state.feeds, (stateFeed) => stateFeed.url === url)
+          if (index < 0) {
+            feedId = state.feeds.length + 1;
+            state.feeds = [...state.feeds, { feedTitle, feedDesc, url: feedUrl, id: feedId }]
+            state.posts = [...postswithIds, ...state.posts];
             state.rssForm.status = 'success';
             state.rssForm.fields.input = '';
           } else {
-            state.posts = checkAndAddNewPosts(state.posts, posts);
+            feedId = state.feeds.find((feed) => feed.url === feedUrl).id;
+            state.posts =  checkAndAddNewPosts(postswithIds, state.posts, feedId);
           }
         })
         .catch((error) => {
@@ -124,14 +109,14 @@ const app = () => {
     };
 
     const refreshFeeds = () => {
-      const feedPromises = state.feeds.map(({ url }) => loadRss(url));
-      return Promise.all(feedPromises);
+          const feedPromises = state.feeds.map(({ url }) => loadRss(url));
+          return Promise.all(feedPromises);
     };
 
     const refresh = () => {
-      refreshFeeds().then(() => {
-        setTimeout(refresh, refreshTimeout);
-      });
+        refreshFeeds().then(() => {
+          setTimeout(refresh, refreshTimeout);
+        });
     };
 
     refresh();
@@ -140,7 +125,7 @@ const app = () => {
       e.preventDefault();
       const data = new FormData(e.target);
       const url = data.get('url');
-      state.rssForm.status = 'being validated';
+      state.rssForm.status = 'validating';
       state.rssForm.fields.input = url;
       const urls = _.map(state.feeds, (feed) => feed.url);
       validateUrl(url, urls)
