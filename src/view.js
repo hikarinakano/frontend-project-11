@@ -8,7 +8,6 @@ export default (elements, i18n, state) => {
     const {
       rssForm: { error, fields, status },
     } = state;
-
     const invalidMessage = () => {
       message.classList.remove('text-success');
       message.classList.add('text-danger');
@@ -16,21 +15,9 @@ export default (elements, i18n, state) => {
       message.textContent = i18n.t(`errors.${error}`);
     };
     submitBtn.disabled = false;
-
-    if (error === 'notUrl' || error === 'duplicateUrl') {
-      invalidMessage();
-    }
-    if (error === 'networkError' || error === 'parseError') {
-      if (status === 'loading Rss') {
-        message.textContent = '';
-        submitBtn.disabled = true;
-        input.classList.remove('is-invalid');
-      }
-      if (status === 'not loading') {
+      if (status === 'fail') {
         invalidMessage();
       }
-    }
-    if (error === '') {
       if (status === 'loading Rss') {
         input.classList.remove('is-invalid');
         message.textContent = '';
@@ -45,7 +32,6 @@ export default (elements, i18n, state) => {
         input.classList.remove('is-invalid');
         message.textContent = i18n.t('success');
       }
-    }
     input.value = fields.input;
   });
 };
