@@ -21,7 +21,8 @@ const changeVisitedLinks = ({ id }) => {
   });
 };
 
-const createPosts = (ui, posts, postsHeader, viewButton, ul) => {
+const createPosts = (state, postsHeader, viewButton, ul) => {
+  const { ui, posts } = state;
   const postsDiv = document.querySelector('.posts');
   postsDiv.innerHTML = '';
 
@@ -38,7 +39,7 @@ const createPosts = (ui, posts, postsHeader, viewButton, ul) => {
   bodyDiv.insertAdjacentElement('beforeend', header);
 
   posts.forEach(({
-    url, title, id,
+    url, title, postId,
   }) => {
     const li = document.createElement('li');
     li.classList.add(
@@ -49,21 +50,19 @@ const createPosts = (ui, posts, postsHeader, viewButton, ul) => {
       'border-0',
       'border-end-0',
     );
-// write check for visited links when creating a post
-  
     const a = document.createElement('a');
     a.classList.add('fw-bold');
     a.setAttribute('href', url);
-    a.setAttribute('data-id', id);
+    a.setAttribute('data-id', postId);
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener noreferrer');
     a.textContent = title;
     ui.openedLinks.forEach((link) => {
       if (link === url) {
-          a.classList.remove('fw-bold');
-          a.classList.add('fw-normal', 'link-secondary');
-        }
-    })
+        a.classList.remove('fw-bold');
+        a.classList.add('fw-normal', 'link-secondary');
+      }
+    });
     a.addEventListener('click', () => {
       ui.openedLinks.add(url);
       ui.id = url;
@@ -74,7 +73,7 @@ const createPosts = (ui, posts, postsHeader, viewButton, ul) => {
 
     const button = document.createElement('button');
     button.setAttribute('type', 'button');
-    button.setAttribute('data-id', id);
+    button.setAttribute('data-id', postId);
     button.setAttribute('data-bs-toggle', 'modal');
     button.setAttribute('data-bs-target', '#modal');
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
@@ -97,7 +96,8 @@ const createPosts = (ui, posts, postsHeader, viewButton, ul) => {
   postsDiv.insertAdjacentElement('beforeend', newDiv);
 };
 
-export default function render({feeds, posts, ui}, [postsHeader, feedsHeader, viewButton]) {
+export default function render(state, [postsHeader, feedsHeader, viewButton]) {
+  const { feeds } = state;
   if (feeds.length !== 0) {
     const feedsDiv = document.querySelector('.feeds');
     feedsDiv.innerHTML = '';
@@ -137,7 +137,7 @@ export default function render({feeds, posts, ui}, [postsHeader, feedsHeader, vi
 
       ul.append(li);
 
-      createPosts(ui, posts, postsHeader, viewButton, postsUl);
+      createPosts(state, postsHeader, viewButton, postsUl);
     });
     newDiv.insertAdjacentElement('beforeend', ul);
     feedsDiv.insertAdjacentElement('beforeend', newDiv);
