@@ -7,6 +7,9 @@ export default (elements, i18n, state) => {
   return onChange(state, () => {
     const {
       rssForm: { error, fields, status },
+      feeds,
+      posts,
+      ui,
     } = state;
     const invalidMessage = () => {
       message.classList.remove('text-success');
@@ -25,7 +28,7 @@ export default (elements, i18n, state) => {
     }
     if (status === 'success') {
       input.focus();
-      render(state, [postsTr, feedsTr, viewButton]);
+      render({ feeds, posts, ui }, [postsTr, feedsTr, viewButton]);
 
       message.classList.add('text-success');
       message.classList.remove('text-danger');
