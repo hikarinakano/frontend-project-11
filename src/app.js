@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import _, { get } from 'lodash';
+import _ from 'lodash';
 import i18next from 'i18next';
 import axios from 'axios';
 import watch from './view.js';
@@ -10,12 +10,14 @@ import customErrors from './locales/yupLocale.js';
 const refreshTimeout = 5000;
 
 const checkAndAddNewPosts = (newPosts, oldPosts, feedId) => {
-  const uniqueNewPosts = newPosts.filter(newPost =>
-    !oldPosts.some(oldPost => oldPost.title === newPost.title || oldPost.url === newPost.url)
+  const uniqueNewPosts = newPosts.filter(
+    (newPost) => !oldPosts.some(
+      (oldPost) => oldPost.title === newPost.title || oldPost.url === newPost.url,
+    ),
   );
-  const postsWithFeedId = uniqueNewPosts.map(post => ({
+  const postsWithFeedId = uniqueNewPosts.map((post) => ({
     ...post,
-    feedId: feedId
+    feedId,
   }));
   const updatedPosts = [...oldPosts, ...postsWithFeedId];
   return updatedPosts;
@@ -84,20 +86,23 @@ const app = () => {
           const feed = parseFeed(data);
           const { feedTitle, feedDesc, posts } = feed;
           const postswithIds = posts.map((post) => ({
-              ...post,
-              feedId,
-              id: _.uniqueId(),
-            }));
-          const index = _.findIndex(state.feeds, (stateFeed) => stateFeed.url === url)
+            ...post,
+            feedId,
+            id: _.uniqueId(),
+          }));
+          const index = _.findIndex(state.feeds, (stateFeed) => stateFeed.url === url);
           if (index < 0) {
             feedId = state.feeds.length + 1;
-            state.feeds = [...state.feeds, { feedTitle, feedDesc, url: feedUrl, id: feedId }]
+            state.feeds = [...state.feeds,
+              {
+                feedTitle, feedDesc, url: feedUrl, id: feedId,
+              }];
             state.posts = [...postswithIds, ...state.posts];
             state.rssForm.status = 'success';
             state.rssForm.fields.input = '';
           } else {
-            feedId = state.feeds.find((feed) => feed.url === feedUrl).id;
-            state.posts =  checkAndAddNewPosts(postswithIds, state.posts, feedId);
+            feedId = state.feeds.find((stateFeed) => stateFeed.url === feedUrl).id;
+            state.posts = checkAndAddNewPosts(postswithIds, state.posts, feedId);
           }
         })
         .catch((error) => {
@@ -109,14 +114,14 @@ const app = () => {
     };
 
     const refreshFeeds = () => {
-          const feedPromises = state.feeds.map(({ url }) => loadRss(url));
-          return Promise.all(feedPromises);
+      const feedPromises = state.feeds.map(({ url }) => loadRss(url));
+      return Promise.all(feedPromises);
     };
 
     const refresh = () => {
-        refreshFeeds().then(() => {
-          setTimeout(refresh, refreshTimeout);
-        });
+      refreshFeeds().then(() => {
+        setTimeout(refresh, refreshTimeout);
+      });
     };
 
     refresh();
