@@ -96,7 +96,7 @@ const app = () => {
           const postswithIds = posts.map((post) => ({
             ...post,
             feedId,
-            id: _.uniqueId(),
+            postId: _.uniqueId(),
           }));
           const index = _.findIndex(state.feeds, (stateFeed) => stateFeed.url === url);
           if (index < 0) {
@@ -146,7 +146,6 @@ const app = () => {
           } else {
             errorHandler(error);
           }
-          
         });
     });
   }).catch((err) => {
