@@ -11,18 +11,17 @@ const renderModal = (posts, uiId) => {
   modalEl.openLinkButton.href = url;
 };
 
-const changeVisitedLinks = ({ url }) => {
+const changeVisitedLinks = ({ id }) => {
   const links = document.querySelectorAll('a[data-id].fw-bold');
   Array.from(links).forEach((link) => {
-    if (link.href === url) {
+    if (link.href === id) {
       link.classList.remove('fw-bold');
       link.classList.add('fw-normal', 'link-secondary');
     }
   });
 };
 
-const createPosts = (state, posts, postsHeader, viewButton, ul) => {
-  const { ui } = state;
+const createPosts = (ui, posts, postsHeader, viewButton, ul) => {
   const postsDiv = document.querySelector('.posts');
   postsDiv.innerHTML = '';
 
@@ -50,7 +49,8 @@ const createPosts = (state, posts, postsHeader, viewButton, ul) => {
       'border-0',
       'border-end-0',
     );
-
+// write check for visited links when creating a post
+  
     const a = document.createElement('a');
     a.classList.add('fw-bold');
     a.setAttribute('href', url);
@@ -58,6 +58,12 @@ const createPosts = (state, posts, postsHeader, viewButton, ul) => {
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener noreferrer');
     a.textContent = title;
+    ui.openedLinks.forEach((link) => {
+      if (link === url) {
+          a.classList.remove('fw-bold');
+          a.classList.add('fw-normal', 'link-secondary');
+        }
+    })
     a.addEventListener('click', () => {
       ui.openedLinks.add(url);
       ui.id = url;
@@ -91,8 +97,7 @@ const createPosts = (state, posts, postsHeader, viewButton, ul) => {
   postsDiv.insertAdjacentElement('beforeend', newDiv);
 };
 
-export default function render(state, [postsHeader, feedsHeader, viewButton]) {
-  const { feeds, posts } = state;
+export default function render({feeds, posts, ui}, [postsHeader, feedsHeader, viewButton]) {
   if (feeds.length !== 0) {
     const feedsDiv = document.querySelector('.feeds');
     feedsDiv.innerHTML = '';
@@ -132,7 +137,7 @@ export default function render(state, [postsHeader, feedsHeader, viewButton]) {
 
       ul.append(li);
 
-      createPosts(state, posts, postsHeader, viewButton, postsUl);
+      createPosts(ui, posts, postsHeader, viewButton, postsUl);
     });
     newDiv.insertAdjacentElement('beforeend', ul);
     feedsDiv.insertAdjacentElement('beforeend', newDiv);
