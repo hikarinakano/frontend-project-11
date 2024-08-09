@@ -75,6 +75,7 @@ const app = () => {
     });
 
     // write handle errors function
+
     const loadRss = (url) => {
       const feedUrl = url.toString();
       const proxiedUrl = addProxy(url);
@@ -106,10 +107,7 @@ const app = () => {
           }
         })
         .catch((error) => {
-          if (error.code === 'ERR_NETWORK') {
-            state.rssForm.error = 'networkError';
-          } else state.rssForm.error = error.message;
-          state.rssForm.status = 'not loading';
+          return error;
         });
     };
 
@@ -130,7 +128,6 @@ const app = () => {
       e.preventDefault();
       const data = new FormData(e.target);
       const url = data.get('url');
-      state.rssForm.status = 'validating';
       state.rssForm.fields.input = url;
       const urls = _.map(state.feeds, (feed) => feed.url);
       validateUrl(url, urls)
@@ -142,7 +139,9 @@ const app = () => {
           } else {
             // change the state status here so the error
             // will be displayed accordingly to state, not text
+            console.log('final catch error', error)
             state.rssForm.error = error;
+            state.rssForm.status = 'fail';
           }
         });
     });
