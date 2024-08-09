@@ -15,23 +15,23 @@ export default (elements, i18n, state) => {
       message.textContent = i18n.t(`errors.${error}`);
     };
     submitBtn.disabled = false;
-      if (status === 'fail') {
-        invalidMessage();
-      }
-      if (status === 'loading Rss') {
-        input.classList.remove('is-invalid');
-        message.textContent = '';
-        submitBtn.disabled = true;
-      }
-      if (status === 'success') {
-        input.focus();
-        render(state, [postsTr, feedsTr, viewButton]);
+    if (status === 'fail') {
+      invalidMessage();
+    }
+    if (status === 'loading Rss') {
+      input.classList.remove('is-invalid');
+      message.textContent = '';
+      submitBtn.disabled = true;
+    }
+    if (status === 'success') {
+      input.focus();
+      render(state, [postsTr, feedsTr, viewButton]);
 
-        message.classList.add('text-success');
-        message.classList.remove('text-danger');
-        input.classList.remove('is-invalid');
-        message.textContent = i18n.t('success');
-      }
+      message.classList.add('text-success');
+      message.classList.remove('text-danger');
+      input.classList.remove('is-invalid');
+      message.textContent = i18n.t('success');
+    }
     input.value = fields.input;
   });
 };

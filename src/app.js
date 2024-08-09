@@ -79,12 +79,10 @@ const app = () => {
       state.rssForm.status = 'fail';
       if (typeof error === 'string') {
         state.rssForm.error = error;
-      }
-      else if (error.code === 'ERR_NETWORK') {
+      } else if (error.code === 'ERR_NETWORK') {
         state.rssForm.error = 'networkError';
-      }
-      else state.rssForm.error = error.message;
-    }
+      } else state.rssForm.error = error.message;
+    };
 
     const loadRss = (url) => {
       const feedUrl = url.toString();
