@@ -19,7 +19,7 @@ const checkAndAddNewPosts = (newPosts, oldPosts, feedId) => {
     ...post,
     feedId,
   }));
-  const updatedPosts = [...oldPosts, ...postsWithFeedId];
+  const updatedPosts = [...postsWithFeedId, ...oldPosts];
   return updatedPosts;
 };
 
@@ -74,7 +74,6 @@ const app = () => {
       },
     });
 
-    // write handle errors function
     const errorHandler = (error) => {
       state.rssForm.status = 'fail';
       if (typeof error === 'string') {
@@ -147,6 +146,7 @@ const app = () => {
           } else {
             errorHandler(error);
           }
+          
         });
     });
   }).catch((err) => {
