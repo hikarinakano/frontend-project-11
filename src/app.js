@@ -15,11 +15,11 @@ const checkAndAddNewPosts = (newPosts, oldPosts, feedId) => {
       (oldPost) => oldPost.title === newPost.title || oldPost.url === newPost.url,
     ),
   );
-  const postsWithFeedId = uniqueNewPosts.map((post) => ({
+  const relatedPosts = uniqueNewPosts.map((post) => ({
     ...post,
     feedId,
   }));
-  const updatedPosts = [...postsWithFeedId, ...oldPosts];
+  const updatedPosts = [...relatedPosts, ...oldPosts];
   return updatedPosts;
 };
 
@@ -39,6 +39,16 @@ const addProxy = (originUrl) => {
   proxyUrl.searchParams.set('url', originUrl);
   proxyUrl.searchParams.set('disableCache', 'true');
   return proxyUrl.toString();
+};
+
+const errorCode = (error) => {
+  if (error.code === 'ERR_NETWORK') {
+    return 'networkError';
+  }
+  if (error.message === 'parseError') {
+    return error.message;
+  }
+  return 'unknown error';
 };
 
 const app = () => {
@@ -74,15 +84,6 @@ const app = () => {
       },
     });
 
-    const errorHandler = (error) => {
-      state.rssForm.status = 'fail';
-      if (typeof error === 'string') {
-        state.rssForm.error = error;
-      } else if (error.code === 'ERR_NETWORK') {
-        state.rssForm.error = 'networkError';
-      } else state.rssForm.error = error.message;
-    };
-
     const loadRss = (url) => {
       const feedUrl = url.toString();
       const proxiedUrl = addProxy(url);
@@ -114,7 +115,8 @@ const app = () => {
           }
         })
         .catch((error) => {
-          errorHandler(error);
+          state.rssForm.status = 'fail';
+          state.rssForm.error = error;
         });
     };
 
@@ -144,7 +146,8 @@ const app = () => {
             state.rssForm.status = 'loading Rss';
             loadRss(url);
           } else {
-            errorHandler(error);
+            state.rssForm.status = 'fail';
+            state.rssForm.error = errorCode(error);
           }
         });
     });
