@@ -34,6 +34,11 @@ const getErrorCode = (error) => {
   if (error.isParseError) {
     return 'parseError';
   }
+  // cannot return the keys here
+  // that's why i check if string
+  if (typeof error === 'string') {
+    return error;
+  }
   return 'unknown';
 };
 
@@ -71,9 +76,15 @@ const loadRss = (url, state) => {
   })
     .catch((error) => {
       state.rssForm.status = 'fail';
+      if (error.name === 'axiosError') {
+        const err = new Error('axiosError');
+        err.isAxiosError = true;
+        throw err;
+      }
       state.rssForm.error = getErrorCode(error);
     });
 };
+
 const updatePosts = (feedUrl, feedId, state) => {
   const oldPosts = state.posts;
   return getParsedData(feedUrl)
