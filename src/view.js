@@ -4,6 +4,11 @@ import render from './render.js';
 export default (elements, i18n, state) => {
   const { input, message, submitBtn } = elements;
   return onChange(state, () => {
+    // check path of changed param in state, do not need to analyze it
+    // console.log('it is a path', path)
+    // console.log('value', value)
+    // if valid
+    // if not valid
     const {
       rssForm: { error, fields, status },
     } = state;
@@ -24,7 +29,7 @@ export default (elements, i18n, state) => {
     }
     if (status === 'success') {
       input.focus();
-      render(state, [i18n.t('posts'), i18n.t('feeds'), i18n.t('viewButton')]);
+      render(state, i18n.t('posts'), i18n.t('feeds'), i18n.t('viewButton'));
 
       message.classList.add('text-success');
       message.classList.remove('text-danger');

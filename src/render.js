@@ -20,6 +20,7 @@ const changeVisitedLinks = ({ id }) => {
     }
   });
 };
+// move changeVisitedLinks logic to app, should not be in render
 
 const createPosts = (state, postsHeader, viewButton, ul) => {
   const { ui, posts } = state;
@@ -96,7 +97,7 @@ const createPosts = (state, postsHeader, viewButton, ul) => {
   postsDiv.insertAdjacentElement('beforeend', newDiv);
 };
 
-export default function render(state, [postsHeader, feedsHeader, viewButton]) {
+export default function render(state, postsHeader, feedsHeader, viewButton) {
   const { feeds } = state;
   if (feeds.length !== 0) {
     const feedsDiv = document.querySelector('.feeds');
