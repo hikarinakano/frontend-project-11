@@ -9,20 +9,6 @@ import customErrors from './locales/yupLocale.js';
 
 const refreshTimeout = 5000;
 
-const checkAndAddNewPosts = (newPosts, oldPosts, feedId) => {
-  const uniqueNewPosts = newPosts.filter(
-    (newPost) => !oldPosts.some(
-      (oldPost) => oldPost.title === newPost.title || oldPost.url === newPost.url,
-    ),
-  );
-  const relatedPosts = uniqueNewPosts.map((post) => ({
-    ...post,
-    feedId,
-  }));
-  const updatedPosts = [...relatedPosts, ...oldPosts];
-  return updatedPosts;
-};
-
 const validateUrl = (url, urls) => {
   const schema = yup.string()
     .url(customErrors.string.url)
@@ -41,14 +27,75 @@ const addProxy = (originUrl) => {
   return proxyUrl.toString();
 };
 
-const errorCode = (error) => {
-  if (error.code === 'ERR_NETWORK') {
+const getErrorCode = (error) => {
+  if (error.isAxiosError) {
     return 'networkError';
   }
-  if (error.message === 'parseError') {
-    return error.message;
+  if (error.isParseError) {
+    return 'parseError';
   }
-  return 'unknown error';
+  return 'unknown';
+};
+
+const getParsedData = (url) => {
+  const proxiedUrl = addProxy(url);
+  const getRequest = axios.get(proxiedUrl, { responseType: 'json' });
+  return getRequest
+    .then((response) => {
+      const data = response.data.contents;
+      const feed = parseFeed(data);
+      return feed;
+    });
+};
+const loadRss = (url, state) => {
+  const feedUrl = url.toString();
+  return getParsedData(url).then((feed) => {
+    const { feedTitle, feedDesc, posts } = feed;
+    const feedId = _.uniqueId('feed_');
+    const postswithIds = posts.map((post) => ({
+      ...post,
+      feedId,
+      postId: _.uniqueId('post_'),
+    }));
+    state.feeds = [...state.feeds,
+      {
+        feedTitle,
+        feedDesc,
+        feedId,
+        feedUrl,
+      },
+    ];
+    state.posts = [...postswithIds, ...state.posts];
+    state.rssForm.status = 'success';
+    state.rssForm.fields.input = '';
+  })
+    .catch((error) => {
+      state.rssForm.status = 'fail';
+      state.rssForm.error = getErrorCode(error);
+    });
+};
+const updatePosts = (feedUrl, feedId, state) => {
+  const oldPosts = state.posts;
+  return getParsedData(feedUrl)
+    .then((feed) => {
+      const { posts } = feed;
+      const oldPostsTitles = oldPosts.map((post) => post.title);
+      const newPosts = posts.filter((post) => !oldPostsTitles.includes(post.title));
+      const newUpdatedPosts = newPosts.map((post) => (
+        {
+          ...post,
+          feedId,
+          postId: _.uniqueId('post_'),
+        }
+      ));
+      state.posts = [...newUpdatedPosts, ...oldPosts];
+    });
+};
+
+const refreshFeeds = (state) => {
+  const { feeds } = state;
+  Promise.all(feeds.map(({ feedUrl, feedId }) => updatePosts(feedUrl, feedId, state)))
+    .then(() => setTimeout(() => refreshFeeds(state), refreshTimeout));
 };
 
 const app = () => {
@@ -83,56 +130,8 @@ const app = () => {
         id: null,
       },
     });
-
-    const loadRss = (url) => {
-      const feedUrl = url.toString();
-      const proxiedUrl = addProxy(url);
-      const getRequest = axios.get(proxiedUrl, { responseType: 'json' });
-      return getRequest
-        .then((response) => {
-          const data = response.data.contents;
-          let feedId;
-          const feed = parseFeed(data);
-          const { feedTitle, feedDesc, posts } = feed;
-          const postswithIds = posts.map((post) => ({
-            ...post,
-            feedId,
-            postId: _.uniqueId(),
-          }));
-          const index = _.findIndex(state.feeds, (stateFeed) => stateFeed.url === url);
-          if (index < 0) {
-            feedId = state.feeds.length + 1;
-            state.feeds = [...state.feeds,
-              {
-                feedTitle, feedDesc, url: feedUrl, id: feedId,
-              }];
-            state.posts = [...postswithIds, ...state.posts];
-            state.rssForm.status = 'success';
-            state.rssForm.fields.input = '';
-          } else {
-            feedId = state.feeds.find((stateFeed) => stateFeed.url === feedUrl).id;
-            state.posts = checkAndAddNewPosts(postswithIds, state.posts, feedId);
-          }
-        })
-        .catch((error) => {
-          state.rssForm.status = 'fail';
-          state.rssForm.error = error;
-        });
-    };
-
-    const refreshFeeds = () => {
-      const feedPromises = state.feeds.map(({ url }) => loadRss(url));
-      return Promise.all(feedPromises);
-    };
-
-    const refresh = () => {
-      refreshFeeds().then(() => {
-        setTimeout(refresh, refreshTimeout);
-      });
-    };
-
-    refresh();
-
+    refreshFeeds(state);
+    // post event listener on click
     elements.form.addEventListener('submit', (e) => {
       e.preventDefault();
       const data = new FormData(e.target);
@@ -144,10 +143,10 @@ const app = () => {
           if (!error) {
             state.rssForm.error = '';
             state.rssForm.status = 'loading Rss';
-            loadRss(url);
+            loadRss(url, state);
           } else {
             state.rssForm.status = 'fail';
-            state.rssForm.error = errorCode(error);
+            state.rssForm.error = getErrorCode(error);
           }
         });
     });
