@@ -1,12 +1,22 @@
 import onChange from 'on-change';
-import render from './render.js';
+
+const changePostToVisited = (list, post) => {
+  const link = post.href;
+  if (list.has(link)) {
+    post.classList.remove('fw-bold');
+    post.classList.add('fw-normal', 'link-secondary');
+  }
+};
 
 const renderPosts = (state, postsHeader, viewButton) => {
-  const { posts } = state;
+  const { posts, ui } = state;
+
   const postsDiv = document.querySelector('.posts');
   postsDiv.innerHTML = '';
+
   const ul = document.createElement('ul');
   ul.classList.add('list-group', 'border-0', 'rounded-0');
+
   const newDiv = document.createElement('div');
   newDiv.classList.add('card', 'border-0');
 
@@ -18,7 +28,6 @@ const renderPosts = (state, postsHeader, viewButton) => {
   header.innerText = postsHeader;
 
   bodyDiv.insertAdjacentElement('beforeend', header);
-
   posts.forEach(({
     url, title, postId,
   }) => {
@@ -38,7 +47,9 @@ const renderPosts = (state, postsHeader, viewButton) => {
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener noreferrer');
     a.textContent = title;
+
     li.insertAdjacentElement('beforeend', a);
+    changePostToVisited(ui.openedLinks, a);
 
     const button = document.createElement('button');
     button.setAttribute('type', 'button');
@@ -48,13 +59,6 @@ const renderPosts = (state, postsHeader, viewButton) => {
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
     button.textContent = viewButton;
 
-    button.addEventListener('click', () => {
-      ui.openedLinks.add(url);
-      ui.id = url;
-      changeVisitedLinks(ui);
-      renderModal(posts, url);
-    });
-
     li.insertAdjacentElement('beforeend', button);
 
     ul.insertAdjacentElement('beforeend', li);
@@ -62,102 +66,142 @@ const renderPosts = (state, postsHeader, viewButton) => {
 
   newDiv.insertAdjacentElement('beforeend', bodyDiv);
   newDiv.insertAdjacentElement('beforeend', ul);
+
   postsDiv.insertAdjacentElement('beforeend', newDiv);
+};
 
-}
+const renderFeeds = (state, feedsHeader) => {
+  const { feeds } = state;
 
-const renderFeeds = (state) => {
-  
-}
+  if (feeds.length !== 0) {
+    const feedsDiv = document.querySelector('.feeds');
+    feedsDiv.innerHTML = '';
+
+    const newDiv = document.createElement('div');
+    newDiv.classList.add('card', 'border-0');
+
+    const bodyDiv = document.createElement('div');
+    bodyDiv.classList.add('card-body');
+
+    const header = document.createElement('h3');
+    header.classList.add('card-title', 'h4');
+    header.innerText = feedsHeader;
+
+    bodyDiv.insertAdjacentElement('beforeend', header);
+
+    newDiv.insertAdjacentElement('beforeend', bodyDiv);
+
+    const ul = document.createElement('ul');
+    ul.classList.add('list-group', 'border-0', 'rounded-0');
+    feeds.forEach(({ feedTitle, feedDesc }) => {
+      const li = document.createElement('li');
+      li.classList.add('list-group-item', 'border-0', 'border-end-0');
+
+      const title = document.createElement('h3');
+      title.classList.add('h6', 'm0');
+      title.textContent = feedTitle;
+
+      const desc = document.createElement('p');
+      desc.classList.add('m0', 'small', 'text-black-50');
+      desc.textContent = feedDesc;
+
+      li.insertAdjacentElement('beforeend', title);
+      li.insertAdjacentElement('beforeend', desc);
+
+      ul.append(li);
+    });
+    newDiv.insertAdjacentElement('beforeend', ul);
+    feedsDiv.insertAdjacentElement('beforeend', newDiv);
+  }
+};
+
+const fillModal = (state) => {
+  const modalHeader = document.querySelector('.modal-header');
+  const modalBody = document.querySelector('.modal-body');
+  const modalLink = document.querySelector('.full-article');
+
+  const { title, desc, url } = state.posts.find((post) => post.url === state.ui.id);
+
+  modalHeader.textContent = title;
+  modalBody.textContent = desc;
+  modalLink.href = url;
+};
+
 export default (elements, i18n, state) => {
   const { input, message, submitBtn } = elements;
-const postsHandler = (state) => {
-  renderPosts(state, i18n.t('posts'),i18n.t('viewButton'));
-}
-// somehow shows error as '';
-const showErrorCode = (rssForm) => {
-  console.log('err code is ', `"${rssForm.error}"`);
-  return rssForm.error;
-}
-const handleLoading = (input, message,submitBtn) => {
-  input.classList.remove('is-invalid');
-  message.textContent = '';
-  submitBtn.disabled = true;
-}
-const errorHandler = (state) => {
+
+  const postsHandler = () => {
+    renderPosts(state, i18n.t('posts'), i18n.t('viewButton'));
+  };
+
+  const showOnLoading = () => {
+    input.classList.remove('is-invalid');
+    message.textContent = '';
+    submitBtn.disabled = true;
+  };
+
+  const errorHandler = () => {
     const { rssForm } = state;
     message.classList.remove('text-success');
     message.classList.add('text-danger');
     input.classList.add('is-invalid');
     message.textContent = i18n.t(`errors.${rssForm.error}`);
     submitBtn.disabled = false;
-}
+  };
 
-const feedsHandler = (state) => {
-  console.log(state.feeds);
-}
+  const feedsHandler = () => {
+    renderFeeds(state, i18n.t('feeds'));
+  };
 
-const handleStatus = (state) => {
-  
-  const { rssForm } = state;
-  console.log('status should be fail', rssForm.status);
-  switch (rssForm.status) {
-    case 'fail':
-      showErrorCode(rssForm)
-    case 'success':
-      showErrorCode(rssForm);
-      break;
-    case 'loading Rss':
-      handleLoading(input, message, submitBtn);
-      break;
-    default:
-      break;
-  }
-}
+  const showOnSuccess = () => {
+    input.focus();
+    submitBtn.disabled = false;
+    message.classList.add('text-success');
+    message.classList.remove('text-danger');
+    input.classList.remove('is-invalid');
+    message.textContent = i18n.t('success');
+  };
 
-  return onChange(state, (path, value) => {
-    // check path of changed param in state, do not need to analyze it
-    console.log('path is changed:', path)
+  const handleStatus = () => {
+    const { rssForm } = state;
+    switch (rssForm.status) {
+      case 'fail':
+        break;
+      case 'success':
+        showOnSuccess();
+        break;
+      case 'loading Rss':
+        showOnLoading();
+        break;
+      default:
+        break;
+    }
+  };
+
+  return onChange(state, (path) => {
     switch (path) {
       case 'rssForm.status':
-        handleStatus(state)
+        handleStatus(state);
         break;
-      case 'rssForm.error': 
+      case 'rssForm.error':
         errorHandler(state);
         break;
       case 'feeds':
         feedsHandler(state);
         break;
       case 'posts':
-         postsHandler(state);
-         break;
+        postsHandler(state);
+        break;
       case 'ui.id':
-         fillModal(state);
-         postsHandler(state);      
+        fillModal(state);
+        postsHandler(state);
+        break;
+      case 'ui.openedLinks':
+        postsHandler(state);
+        break;
       default:
-        console.log('something else happened');
         break;
     }
-    // if valid
-    // if not valid
-
-    // if (value === 'fail') {
-    //   invalidMessage();
-    // }
-    // if (value === 'loading Rss') {
-    //   input.classList.remove('is-invalid');
-    //   message.textContent = '';
-    //   submitBtn.disabled = true;
-    // }
-    // if (value === 'success') {
-    //   input.focus();
-    //   render(state, i18n.t('posts'), i18n.t('feeds'), i18n.t('viewButton'));
-
-    //   message.classList.add('text-success');
-    //   message.classList.remove('text-danger');
-    //   input.classList.remove('is-invalid');
-    //   message.textContent = i18n.t('success');
-    // }
-    //input.value = fields.input;
+    input.value = state.rssForm.fields.input;
   });
 };
