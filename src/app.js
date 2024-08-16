@@ -8,7 +8,7 @@ import parseFeed from './rssParser.js';
 import customErrors from './locales/yupLocale.js';
 
 const refreshTimeout = 5000;
-
+const postsDiv = document.querySelector('.posts');
 const validateUrl = (url, urls) => {
   const schema = yup.string()
     .url(customErrors.string.url)
@@ -51,7 +51,8 @@ const getParsedData = (url) => {
       const feed = parseFeed(data);
       return feed;
     });
-};
+}
+
 const loadRss = (url, state) => {
   const feedUrl = url.toString();
   return getParsedData(url).then((feed) => {
@@ -148,7 +149,8 @@ const app = () => {
       const data = new FormData(e.target);
       const url = data.get('url');
       state.rssForm.fields.input = url;
-      const urls = _.map(state.feeds, (feed) => feed.url);
+      console.log(state.feeds)
+      const urls = _.map(state.feeds, ({ feedUrl }) => feedUrl);
       validateUrl(url, urls)
         .then((error) => {
           if (!error) {
@@ -157,6 +159,7 @@ const app = () => {
             loadRss(url, state);
           } else {
             state.rssForm.status = 'fail';
+            console.log('got an error')
             state.rssForm.error = getErrorCode(error);
           }
         });
