@@ -8,7 +8,6 @@ import parseFeed from './rssParser.js';
 import customErrors from './locales/yupLocale.js';
 
 const refreshTimeout = 5000;
-const postsDiv = document.querySelector('.posts');
 const validateUrl = (url, urls) => {
   const schema = yup.string()
     .url(customErrors.string.url)
@@ -51,9 +50,10 @@ const getParsedData = (url) => {
       const feed = parseFeed(data);
       return feed;
     });
-}
+};
 
 const loadRss = (url, state) => {
+  state.rssForm.status = 'loading Rss';
   const feedUrl = url.toString();
   return getParsedData(url).then((feed) => {
     const { feedTitle, feedDesc, posts } = feed;
@@ -77,16 +77,17 @@ const loadRss = (url, state) => {
   })
     .catch((error) => {
       state.rssForm.status = 'fail';
-      if (error.name === 'axiosError') {
-        const err = new Error('axiosError');
-        err.isAxiosError = true;
-        throw err;
+      if (error.name === 'AxiosError') {
+        const axiosErr = new Error('axiosError');
+        axiosErr.isAxiosError = true;
+        state.rssForm.error = getErrorCode(axiosErr);
       }
       state.rssForm.error = getErrorCode(error);
     });
 };
 
 const updatePosts = (feedUrl, feedId, state) => {
+  state.rssForm.status = 'loading Rss';
   const oldPosts = state.posts;
   return getParsedData(feedUrl)
     .then((feed) => {
@@ -101,6 +102,14 @@ const updatePosts = (feedUrl, feedId, state) => {
         }
       ));
       state.posts = [...newUpdatedPosts, ...oldPosts];
+    })
+    .catch((error) => {
+      if (error.name === 'AxiosError') {
+        const axiosErr = new Error('axiosError');
+        axiosErr.isAxiosError = true;
+        state.rssForm.error = getErrorCode(axiosErr);
+      }
+      state.rssForm.error = getErrorCode(error);
     });
 };
 
@@ -142,27 +151,38 @@ const app = () => {
         id: null,
       },
     });
+
     refreshFeeds(state);
-    // post event listener on click
+
     elements.form.addEventListener('submit', (e) => {
       e.preventDefault();
       const data = new FormData(e.target);
       const url = data.get('url');
       state.rssForm.fields.input = url;
-      console.log(state.feeds)
       const urls = _.map(state.feeds, ({ feedUrl }) => feedUrl);
       validateUrl(url, urls)
         .then((error) => {
           if (!error) {
             state.rssForm.error = '';
-            state.rssForm.status = 'loading Rss';
             loadRss(url, state);
           } else {
             state.rssForm.status = 'fail';
-            console.log('got an error')
             state.rssForm.error = getErrorCode(error);
           }
         });
+    });
+    const postsContainer = document.querySelector('.posts');
+    postsContainer.addEventListener('click', (e) => {
+      if (e.target.tagName.toLowerCase() === 'button') {
+        const clickedPostId = e.target.getAttribute('data-id');
+        const clickedPost = state.posts.find(({ postId }) => postId === clickedPostId);
+        state.ui.id = clickedPost.url;
+        state.ui.openedLinks.add(clickedPost.url);
+      }
+      if (e.target.tagName.toLowerCase() === 'a') {
+        const clickedPostUrl = e.target.getAttribute('href');
+        state.ui.openedLinks.add(clickedPostUrl);
+      }
     });
   }).catch((err) => {
     console.error('Error initializing i18next:', err);
