@@ -8,11 +8,10 @@ const changePostToVisited = (list, post) => {
   }
 };
 
-const renderPosts = (state, postsHeader, viewButton) => {
+const renderPosts = (state, postsContainer, postsHeader, viewButton) => {
   const { posts, ui } = state;
 
-  const postsDiv = document.querySelector('.posts');
-  postsDiv.innerHTML = '';
+  postsContainer.innerHTML = '';
 
   const ul = document.createElement('ul');
   ul.classList.add('list-group', 'border-0', 'rounded-0');
@@ -67,15 +66,14 @@ const renderPosts = (state, postsHeader, viewButton) => {
   newDiv.insertAdjacentElement('beforeend', bodyDiv);
   newDiv.insertAdjacentElement('beforeend', ul);
 
-  postsDiv.insertAdjacentElement('beforeend', newDiv);
+  postsContainer.insertAdjacentElement('beforeend', newDiv);
 };
 
-const renderFeeds = (state, feedsHeader) => {
+const renderFeeds = (state, feedsContainer, feedsHeader) => {
   const { feeds } = state;
 
   if (feeds.length !== 0) {
-    const feedsDiv = document.querySelector('.feeds');
-    feedsDiv.innerHTML = '';
+    feedsContainer.innerHTML = '';
 
     const newDiv = document.createElement('div');
     newDiv.classList.add('card', 'border-0');
@@ -111,7 +109,7 @@ const renderFeeds = (state, feedsHeader) => {
       ul.append(li);
     });
     newDiv.insertAdjacentElement('beforeend', ul);
-    feedsDiv.insertAdjacentElement('beforeend', newDiv);
+    feedsContainer.insertAdjacentElement('beforeend', newDiv);
   }
 };
 
@@ -128,10 +126,17 @@ const fillModal = (state) => {
 };
 
 export default (elements, i18n, state) => {
-  const { input, message, submitBtn } = elements;
+  const
+    {
+      input,
+      message,
+      submitBtn,
+      postsContainer,
+      feedsContainer,
+    } = elements;
 
   const postsHandler = () => {
-    renderPosts(state, i18n.t('posts'), i18n.t('viewButton'));
+    renderPosts(state, postsContainer, i18n.t('posts'), i18n.t('viewButton'));
   };
 
   const showOnLoading = () => {
@@ -150,7 +155,7 @@ export default (elements, i18n, state) => {
   };
 
   const feedsHandler = () => {
-    renderFeeds(state, i18n.t('feeds'));
+    renderFeeds(state, feedsContainer, i18n.t('feeds'));
   };
 
   const showOnSuccess = () => {
