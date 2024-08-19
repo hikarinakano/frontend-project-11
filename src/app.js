@@ -53,24 +53,22 @@ const getParsedData = (url) => {
 
 const loadRss = (url, state) => {
   state.rssForm.status = 'loading Rss';
-  const feedUrl = url;
   return getParsedData(url).then((feed) => {
     const { feedTitle, feedDesc, posts } = feed;
-    const feedId = _.uniqueId('feed_');
-    const postswithIds = posts.map((post) => ({
-      ...post,
-      feedId,
-      postId: _.uniqueId('post_'),
-    }));
     state.feeds = [
       ...state.feeds,
       {
         feedTitle,
         feedDesc,
-        feedId,
-        feedUrl,
+        feedId: _.uniqueId('feed_'),
+        feedUrl: url,
       },
     ];
+    const postswithIds = posts.map((post) => ({
+      ...post,
+      feedId,
+      postId: _.uniqueId('post_'),
+    }));
     state.posts = [...postswithIds, ...state.posts];
     state.rssForm.status = 'success';
     state.rssForm.fields.input = '';
