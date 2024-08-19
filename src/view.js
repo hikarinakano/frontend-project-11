@@ -8,6 +8,39 @@ const changePostToVisited = (list, post) => {
   }
 };
 
+const createPost = (ul, viewButton, ui, url, title, postId) => {
+  const li = document.createElement('li');
+  li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
+  const a = document.createElement('a');
+  a.classList.add('fw-bold');
+  const attributes = {
+    href: url,
+    'data-id': postId,
+    target: '_blank',
+    rel: 'noopener noreferrer',
+  };
+  Object.entries(attributes).forEach(([key, value]) => a.setAttribute(key, value));
+  a.textContent = title;
+  li.insertAdjacentElement('beforeend', a);
+  changePostToVisited(ui.openedLinks, a);
+
+  const button = document.createElement('button');
+  button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+  const buttonAttributes = {
+    type: 'button',
+    'data-id': postId,
+    'data-bs-toggle': 'modal',
+    'data-bs-target': '#modal',
+  };
+  Object.entries(buttonAttributes).forEach(([key, value]) => button.setAttribute(key, value));
+
+  button.textContent = viewButton;
+
+  li.insertAdjacentElement('beforeend', button);
+
+  ul.insertAdjacentElement('beforeend', li);
+};
+
 const renderPosts = (state, postsContainer, postsHeader, viewButton) => {
   const { posts, ui } = state;
 
@@ -29,50 +62,30 @@ const renderPosts = (state, postsContainer, postsHeader, viewButton) => {
   bodyDiv.insertAdjacentElement('beforeend', header);
   posts.forEach(({
     url, title, postId,
-  }) => {
-    const li = document.createElement('li');
-    li.classList.add(
-      'list-group-item',
-      'd-flex',
-      'justify-content-between',
-      'align-items-start',
-      'border-0',
-      'border-end-0',
-    );
-    const a = document.createElement('a');
-    a.classList.add('fw-bold');
-    const attributes = {
-      href: url,
-      'data-id': postId,
-      target: '_blank',
-      rel: 'noopener noreferrer',
-    };
-    Object.entries(attributes).forEach(([key, value]) => a.setAttribute(key, value));
-    a.textContent = title;
-    li.insertAdjacentElement('beforeend', a);
-    changePostToVisited(ui.openedLinks, a);
-
-    const button = document.createElement('button');
-    button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
-    const buttonAttributes = {
-      type: 'button',
-      'data-id': postId,
-      'data-bs-toggle': 'modal',
-      'data-bs-target': '#modal',
-    };
-    Object.entries(buttonAttributes).forEach(([key, value]) => button.setAttribute(key, value));
-
-    button.textContent = viewButton;
-
-    li.insertAdjacentElement('beforeend', button);
-
-    ul.insertAdjacentElement('beforeend', li);
-  });
+  }) => createPost(ul, viewButton, ui, url, title, postId));
 
   newDiv.insertAdjacentElement('beforeend', bodyDiv);
   newDiv.insertAdjacentElement('beforeend', ul);
 
   postsContainer.insertAdjacentElement('beforeend', newDiv);
+};
+
+const createFeed = (ul, feedTitle, feedDesc) => {
+  const li = document.createElement('li');
+  li.classList.add('list-group-item', 'border-0', 'border-end-0');
+
+  const title = document.createElement('h3');
+  title.classList.add('h6', 'm0');
+  title.textContent = feedTitle;
+
+  const desc = document.createElement('p');
+  desc.classList.add('m0', 'small', 'text-black-50');
+  desc.textContent = feedDesc;
+
+  li.insertAdjacentElement('beforeend', title);
+  li.insertAdjacentElement('beforeend', desc);
+
+  ul.append(li);
 };
 
 const renderFeeds = (state, feedsContainer, feedsHeader) => {
@@ -97,23 +110,7 @@ const renderFeeds = (state, feedsContainer, feedsHeader) => {
 
     const ul = document.createElement('ul');
     ul.classList.add('list-group', 'border-0', 'rounded-0');
-    feeds.forEach(({ feedTitle, feedDesc }) => {
-      const li = document.createElement('li');
-      li.classList.add('list-group-item', 'border-0', 'border-end-0');
-
-      const title = document.createElement('h3');
-      title.classList.add('h6', 'm0');
-      title.textContent = feedTitle;
-
-      const desc = document.createElement('p');
-      desc.classList.add('m0', 'small', 'text-black-50');
-      desc.textContent = feedDesc;
-
-      li.insertAdjacentElement('beforeend', title);
-      li.insertAdjacentElement('beforeend', desc);
-
-      ul.append(li);
-    });
+    feeds.forEach(({ feedTitle, feedDesc }) => createFeed(ul, feedTitle, feedDesc));
     newDiv.insertAdjacentElement('beforeend', ul);
     feedsContainer.insertAdjacentElement('beforeend', newDiv);
   }
