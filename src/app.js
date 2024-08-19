@@ -25,16 +25,15 @@ const addProxy = (originUrl) => {
   proxyUrl.searchParams.set('disableCache', 'true');
   return proxyUrl.toString();
 };
+const isAxiosError = (error) => error.name === 'AxiosError';
 
 const getErrorCode = (error) => {
-  if (error.isAxiosError) {
+  if (isAxiosError(error)) {
     return 'networkError';
   }
   if (error.isParseError) {
     return 'parseError';
   }
-  // cannot return the keys here
-  // that's why i check if string
   if (typeof error === 'string') {
     return error;
   }
@@ -54,7 +53,7 @@ const getParsedData = (url) => {
 
 const loadRss = (url, state) => {
   state.rssForm.status = 'loading Rss';
-  const feedUrl = url.toString();
+  const feedUrl = url;
   return getParsedData(url).then((feed) => {
     const { feedTitle, feedDesc, posts } = feed;
     const feedId = _.uniqueId('feed_');
@@ -63,7 +62,8 @@ const loadRss = (url, state) => {
       feedId,
       postId: _.uniqueId('post_'),
     }));
-    state.feeds = [...state.feeds,
+    state.feeds = [
+      ...state.feeds,
       {
         feedTitle,
         feedDesc,
@@ -77,46 +77,34 @@ const loadRss = (url, state) => {
   })
     .catch((error) => {
       state.rssForm.status = 'fail';
-      if (error.name === 'AxiosError') {
-        const axiosErr = new Error('axiosError');
-        axiosErr.isAxiosError = true;
-        state.rssForm.error = getErrorCode(axiosErr);
-      }
       state.rssForm.error = getErrorCode(error);
     });
 };
 
-const updatePosts = (feedUrl, feedId, state) => {
-  state.rssForm.status = 'loading Rss';
-  const oldPosts = state.posts;
-  return getParsedData(feedUrl)
-    .then((feed) => {
-      const { posts } = feed;
-      const oldPostsTitles = oldPosts.map((post) => post.title);
-      const newPosts = posts.filter((post) => !oldPostsTitles.includes(post.title));
-      const newUpdatedPosts = newPosts.map((post) => (
-        {
-          ...post,
-          feedId,
-          postId: _.uniqueId('post_'),
-        }
-      ));
-      state.posts = [...newUpdatedPosts, ...oldPosts];
-    })
-    .catch((error) => {
-      if (error.name === 'AxiosError') {
-        const axiosErr = new Error('axiosError');
-        axiosErr.isAxiosError = true;
-        state.rssForm.error = getErrorCode(axiosErr);
-      }
-      state.rssForm.error = getErrorCode(error);
-    });
-};
-
-const refreshFeeds = (state) => {
+const updatePosts = (state) => {
   const { feeds } = state;
-  Promise.all(feeds.map(({ feedUrl, feedId }) => updatePosts(feedUrl, feedId, state)))
-    .then(() => setTimeout(() => refreshFeeds(state), refreshTimeout));
+  const feedsPromises = feeds.map(({ feedUrl, feedId }) => {
+    state.rssForm.status = 'loading Rss';
+    const oldPosts = state.posts.filter((post) => post.feedId === feedId);
+    return getParsedData(feedUrl)
+      .then((feed) => {
+        const { posts } = feed;
+        const oldPostsTitles = oldPosts.map((post) => post.title);
+        const newPosts = posts.filter((post) => !oldPostsTitles.includes(post.title));
+        const newUpdatedPosts = newPosts.map((post) => (
+          {
+            ...post,
+            feedId,
+            postId: _.uniqueId('post_'),
+          }
+        ));
+        state.posts = [...newUpdatedPosts, ...oldPosts];
+      })
+      .catch(() => {
+        state.rssForm.status = 'fail';
+      });
+  });
+  Promise.all(feedsPromises).then(() => setTimeout(() => updatePosts(state), refreshTimeout));
 };
 
 const app = () => {
@@ -126,6 +114,8 @@ const app = () => {
     example: document.querySelector('.example'),
     message: document.querySelector('.feedback'),
     submitBtn: document.querySelector('button[type="submit"]'),
+    postsContainer: document.querySelector('.posts'),
+    feedsContainer: document.querySelector('.feeds'),
   };
 
   const i18nInstance = i18next.createInstance();
@@ -152,7 +142,7 @@ const app = () => {
       },
     });
 
-    refreshFeeds(state);
+    updatePosts(state);
 
     elements.form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -165,14 +155,15 @@ const app = () => {
           if (!error) {
             state.rssForm.error = '';
             loadRss(url, state);
-          } else {
-            state.rssForm.status = 'fail';
-            state.rssForm.error = getErrorCode(error);
+            return;
           }
+          state.rssForm.status = 'fail';
+          state.rssForm.error = getErrorCode(error);
         });
     });
-    const postsContainer = document.querySelector('.posts');
-    postsContainer.addEventListener('click', (e) => {
+
+    elements.postsContainer.addEventListener('click', (e) => {
+      console.log(e.target.getAttribute('data-id'));
       if (e.target.tagName.toLowerCase() === 'button') {
         const clickedPostId = e.target.getAttribute('data-id');
         const clickedPost = state.posts.find(({ postId }) => postId === clickedPostId);
