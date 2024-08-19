@@ -55,20 +55,21 @@ const loadRss = (url, state) => {
   state.rssForm.status = 'loading Rss';
   return getParsedData(url).then((feed) => {
     const { feedTitle, feedDesc, posts } = feed;
-    state.feeds = [
-      ...state.feeds,
-      {
-        feedTitle,
-        feedDesc,
-        feedId: _.uniqueId('feed_'),
-        feedUrl: url,
-      },
-    ];
+    const feedId = _.uniqueId('feed_');
     const postswithIds = posts.map((post) => ({
       ...post,
       feedId,
       postId: _.uniqueId('post_'),
     }));
+    state.feeds = [
+      ...state.feeds,
+      {
+        feedTitle,
+        feedDesc,
+        feedId,
+        feedUrl: url,
+      },
+    ];
     state.posts = [...postswithIds, ...state.posts];
     state.rssForm.status = 'success';
     state.rssForm.fields.input = '';
