@@ -163,17 +163,13 @@ const app = () => {
     });
 
     elements.postsContainer.addEventListener('click', (e) => {
-      console.log(e.target.getAttribute('data-id'));
-      if (e.target.tagName.toLowerCase() === 'button') {
-        const clickedPostId = e.target.getAttribute('data-id');
-        const clickedPost = state.posts.find(({ postId }) => postId === clickedPostId);
-        state.ui.id = clickedPost.url;
-        state.ui.openedLinks.add(clickedPost.url);
+      const id = e.target.getAttribute('data-id');
+      if (id === null) {
+        return;
       }
-      if (e.target.tagName.toLowerCase() === 'a') {
-        const clickedPostUrl = e.target.getAttribute('href');
-        state.ui.openedLinks.add(clickedPostUrl);
-      }
+      const clickedPost = state.posts.find(({ postId }) => postId === id);
+      state.ui.id = clickedPost.url;
+      state.ui.openedLinks.add(clickedPost.url);
     });
   }).catch((err) => {
     console.error('Error initializing i18next:', err);
