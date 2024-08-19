@@ -97,7 +97,9 @@ const updatePosts = (state) => {
             postId: _.uniqueId('post_'),
           }
         ));
-        state.posts = [...newUpdatedPosts, ...oldPosts];
+        const updatedPosts = [...newUpdatedPosts, ...oldPosts];
+        const allOtherPosts = state.posts.filter((post) => post.feedId !== feedId);
+        state.posts = [...updatedPosts, ...allOtherPosts];
       })
       .catch(() => {
         state.rssForm.status = 'fail';
