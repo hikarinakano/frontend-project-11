@@ -45,7 +45,7 @@ const renderPosts = (state, postsContainer, postsHeader, viewButton) => {
       href: url,
       'data-id': postId,
       target: '_blank',
-      rel: 'noopener noreferrer'
+      rel: 'noopener noreferrer',
     };
     Object.entries(attributes).forEach(([key, value]) => a.setAttribute(key, value));
     a.textContent = title;
@@ -59,7 +59,7 @@ const renderPosts = (state, postsContainer, postsHeader, viewButton) => {
       'data-id': postId,
       'data-bs-toggle': 'modal',
       'data-bs-target': '#modal',
-    }
+    };
     Object.entries(buttonAttributes).forEach(([key, value]) => button.setAttribute(key, value));
 
     button.textContent = viewButton;
