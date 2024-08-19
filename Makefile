@@ -9,3 +9,6 @@ make test: # starts tests
 
 make test-coverage: #tests coverage
 	npm test -- --coverage 
+
+make start: # starts server
+	npm start
