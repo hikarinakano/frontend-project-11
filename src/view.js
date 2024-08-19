@@ -41,21 +41,27 @@ const renderPosts = (state, postsContainer, postsHeader, viewButton) => {
     );
     const a = document.createElement('a');
     a.classList.add('fw-bold');
-    a.setAttribute('href', url);
-    a.setAttribute('data-id', postId);
-    a.setAttribute('target', '_blank');
-    a.setAttribute('rel', 'noopener noreferrer');
+    const attributes = {
+      href: url,
+      'data-id': postId,
+      target: '_blank',
+      rel: 'noopener noreferrer'
+    };
+    Object.entries(attributes).forEach(([key, value]) => a.setAttribute(key, value));
     a.textContent = title;
-
     li.insertAdjacentElement('beforeend', a);
     changePostToVisited(ui.openedLinks, a);
 
     const button = document.createElement('button');
-    button.setAttribute('type', 'button');
-    button.setAttribute('data-id', postId);
-    button.setAttribute('data-bs-toggle', 'modal');
-    button.setAttribute('data-bs-target', '#modal');
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+    const buttonAttributes = {
+      type: 'button',
+      'data-id': postId,
+      'data-bs-toggle': 'modal',
+      'data-bs-target': '#modal',
+    }
+    Object.entries(buttonAttributes).forEach(([key, value]) => button.setAttribute(key, value));
+
     button.textContent = viewButton;
 
     li.insertAdjacentElement('beforeend', button);
@@ -117,9 +123,7 @@ const fillModal = (state) => {
   const modalHeader = document.querySelector('.modal-header');
   const modalBody = document.querySelector('.modal-body');
   const modalLink = document.querySelector('.full-article');
-
   const { title, desc, url } = state.posts.find((post) => post.url === state.ui.id);
-
   modalHeader.textContent = title;
   modalBody.textContent = desc;
   modalLink.href = url;
