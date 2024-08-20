@@ -1,10 +1,10 @@
 const parsePostsXml = (posts) => [...posts].map((item) => {
   const title = item.querySelector('title').textContent;
-  const desc = item.querySelector('description').textContent;
+  const description = item.querySelector('description').textContent;
   const url = item.querySelector('link').textContent;
   return {
     title,
-    desc,
+    description,
     url,
   };
 });
@@ -13,10 +13,10 @@ const parseRssXml = (xml) => {
   const feed = xml.querySelector('channel');
   const posts = feed.querySelectorAll('item');
   const feedTitle = feed.querySelector('title').textContent;
-  const feedDesc = feed.querySelector('description').textContent;
+  const feedDescription = feed.querySelector('description').textContent;
   return {
     feedTitle,
-    feedDesc,
+    feedDescription,
     posts: parsePostsXml(posts),
   };
 };
