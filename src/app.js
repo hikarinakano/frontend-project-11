@@ -25,17 +25,13 @@ const addProxy = (originUrl) => {
   proxyUrl.searchParams.set('disableCache', 'true');
   return proxyUrl.toString();
 };
-const isAxiosError = (error) => error.name === 'AxiosError';
 
 const getErrorCode = (error) => {
-  if (isAxiosError(error)) {
+  if (error.isAxiosError) {
     return 'networkError';
   }
   if (error.isParseError) {
     return 'parseError';
-  }
-  if (typeof error === 'string') {
-    return error;
   }
   return 'unknown';
 };
@@ -97,13 +93,9 @@ const updatePosts = (state) => {
             postId: _.uniqueId('post_'),
           }
         ));
-        const updatedPosts = [...newUpdatedPosts, ...oldPosts];
-        const allOtherPosts = state.posts.filter((post) => post.feedId !== feedId);
-        state.posts = [...updatedPosts, ...allOtherPosts];
+        state.posts = [...newUpdatedPosts, ...state.posts];
       })
-      .catch(() => {
-        state.rssForm.status = 'fail';
-      });
+      .catch(() => {});
   });
   Promise.all(feedsPromises).then(() => setTimeout(() => updatePosts(state), refreshTimeout));
 };
@@ -159,18 +151,17 @@ const app = () => {
             return;
           }
           state.rssForm.status = 'fail';
-          state.rssForm.error = getErrorCode(error);
+          state.rssForm.error = error;
         });
     });
 
     elements.postsContainer.addEventListener('click', (e) => {
-      const id = e.target.getAttribute('data-id');
+      const { id } = e.target.dataset;
       if (id === null) {
         return;
       }
-      const clickedPost = state.posts.find(({ postId }) => postId === id);
-      state.ui.id = clickedPost.url;
-      state.ui.openedLinks.add(clickedPost.url);
+      state.ui.id = id;
+      state.ui.openedLinks.add(id);
     });
   }).catch((err) => {
     console.error('Error initializing i18next:', err);
