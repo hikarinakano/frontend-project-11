@@ -50,7 +50,7 @@ const getParsedData = (url) => {
 const loadRss = (url, state) => {
   state.rssForm.status = 'loading Rss';
   return getParsedData(url).then((feed) => {
-    const { feedTitle, feedDesc, posts } = feed;
+    const { feedTitle, feedDescription, posts } = feed;
     const feedId = _.uniqueId('feed_');
     const postswithIds = posts.map((post) => ({
       ...post,
@@ -61,7 +61,7 @@ const loadRss = (url, state) => {
       ...state.feeds,
       {
         feedTitle,
-        feedDesc,
+        feedDescription,
         feedId,
         feedUrl: url,
       },
