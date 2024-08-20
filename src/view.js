@@ -15,11 +15,11 @@ const renderPost = (postUl, i18n, post, ui) => {
   };
   Object.entries(attributes).forEach(([key, value]) => {
     if (key === 'classList') {
+      a.classList.add('fw-bold');
       if (ui.openedLinks.has(postId)) {
         a.classList.remove('fw-bold');
         a.classList.add('fw-normal', 'link-secondary');
       }
-      a.classList.add('fw-bold');
     }
     a.setAttribute(key, value);
   });
