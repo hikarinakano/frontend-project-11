@@ -160,7 +160,6 @@ const app = () => {
       }
       state.ui.id = id;
       state.ui.openedLinks.add(id);
-
     });
   }).catch((err) => {
     console.error('Error initializing i18next:', err);
