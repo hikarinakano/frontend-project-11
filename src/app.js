@@ -71,7 +71,6 @@ const loadRss = (url, state) => {
     state.rssForm.fields.input = '';
   })
     .catch((error) => {
-      state.rssForm.status = 'fail';
       state.rssForm.error = getErrorCode(error);
     });
 };
@@ -150,7 +149,6 @@ const app = () => {
             loadRss(url, state);
             return;
           }
-          state.rssForm.status = 'fail';
           state.rssForm.error = error;
         });
     });
@@ -162,6 +160,7 @@ const app = () => {
       }
       state.ui.id = id;
       state.ui.openedLinks.add(id);
+
     });
   }).catch((err) => {
     console.error('Error initializing i18next:', err);
