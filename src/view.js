@@ -3,7 +3,14 @@ import onChange from 'on-change';
 const renderPost = (postUl, i18n, post, ui) => {
   const { postId, url, title } = post;
   const li = document.createElement('li');
-  const liClassList = ['list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0'];
+  const liClassList = [
+    'list-group-item',
+    'd-flex',
+    'justify-content-between',
+    'align-items-start',
+    'border-0',
+    'border-end-0',
+  ];
   li.classList.add(...liClassList);
   const a = document.createElement('a');
   const attributes = {
@@ -144,6 +151,9 @@ export default (elements, i18n, state) => {
 
   const handleError = () => {
     const { rssForm } = state;
+    if (rssForm.error === '') {
+      return;
+    }
     message.classList.remove('text-success');
     message.classList.add('text-danger');
     input.classList.add('is-invalid');
@@ -153,6 +163,7 @@ export default (elements, i18n, state) => {
 
   const showOnSuccess = () => {
     input.focus();
+    input.value = '';
     submitBtn.disabled = false;
     message.classList.add('text-success');
     message.classList.remove('text-danger');
@@ -163,8 +174,6 @@ export default (elements, i18n, state) => {
   const handleStatus = () => {
     const { rssForm } = state;
     switch (rssForm.status) {
-      case 'fail':
-        break;
       case 'success':
         showOnSuccess();
         break;
@@ -192,7 +201,6 @@ export default (elements, i18n, state) => {
         break;
       case 'ui.id':
         fillModal(state);
-        handlePosts(state, postsContainer, i18n);
         break;
       case 'ui.openedLinks':
         handlePosts(state, postsContainer, i18n);
@@ -200,6 +208,5 @@ export default (elements, i18n, state) => {
       default:
         break;
     }
-    input.value = state.rssForm.fields.input;
   });
 };
